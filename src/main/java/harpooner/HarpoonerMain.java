@@ -11,9 +11,6 @@ import org.dreambot.api.wrappers.interactive.NPC;
 import java.awt.*;
 import java.util.Arrays;
 
-/**
- * Created by Computor on 7/8/2015.
- */
 @ScriptManifest(category = Category.FISHING, name = "Harpooner", author = "Fernando", version = 1.0)
 public class HarpoonerMain extends AbstractScript {
 
@@ -28,15 +25,14 @@ public class HarpoonerMain extends AbstractScript {
 
     @Override
     public int onLoop() {
-        /**
-         * Chopping trees: Time to chop some trees, our inventory isn't full. We want to fill it up.
-         */
+
         //testCode();
 
         if(!getInventory().isFull()){
+            randomCameraMovement();
             if(pierArea.contains(getLocalPlayer())){
                 dropTunas();
-                getMeSomeFish("Fishing spot"); //change "Tree" to the name of your tree.
+                getMeSomeFish(); //change "Tree" to the name of your tree.
             }else{
                 if(getWalking().walk(pierArea.getRandomTile())){
                     sleep(Calculations.random(3000, 5500));
@@ -44,14 +40,13 @@ public class HarpoonerMain extends AbstractScript {
             }
         }
 
-        /**
-         * Banking: Time to bank our logs. Our inventory is full, we want to empty it.
-         */
+
         if(getInventory().isFull()){ //it is time to bank
-            if(boatIslandArea.contains(getLocalPlayer())){
+            if(boatIslandArea.contains(getLocalPlayer()) || boatMainlandArea.contains(getLocalPlayer())){
                 goToMainland();
                 goToKaramja();
-            }else{
+            }
+            else{
                 if(getWalking().walk(boatIslandArea.getRandomTile())){
                     sleep(Calculations.random(3000, 6000));
                 }
@@ -65,27 +60,45 @@ public class HarpoonerMain extends AbstractScript {
     }
 
     private void dropTunas() {
+        log("dropping tunas...");
         getInventory().dropAll((item) -> item != null && ("Raw tuna").equals(item.getName()) );
     }
 
     private void goToMainland() {
         if(getLocalPlayer().distance(boatMainlandArea.getRandomTile()) > Calculations.random(3, 6)) {
             log("going to mainland...");
-            NPC boatGuy = getNpcs().closest(
-                    n -> n != null && Arrays.toString(n.getActions()).contains("Pay-Fare"));
+            NPC boatGuy = getBoatGuy("Pay-Fare");
             boatGuy.interact("Pay-Fare");
-            sleep(Calculations.random(5000, 7000));
-            GameObject plank = getGameObjects().closest("Gangplank");
-            while (plank == null) {
-                sleep(Calculations.random(1000, 4000));
-                plank = getGameObjects().closest("Gangplank");
-            }
-            log("found plank, crossing...");
-            plank.interact();
+            log("payed fare...");
+            sleep(Calculations.random(7000, 9000));
+            crossPlank();
             sleep(Calculations.random(1500, 4000));
         }
         log("depositing loot...");
         depositLoot();
+    }
+
+    private NPC getBoatGuy(String actionName) {
+        NPC boatGuy = getNpcs().closest(
+                n -> n != null && Arrays.toString(n.getActions()).contains(actionName));
+        while (boatGuy == null) {
+            log("trying to get boat guy...");
+            sleep(Calculations.random(1000, 4000));
+            boatGuy = getNpcs().closest(
+                    n -> n != null && Arrays.toString(n.getActions()).contains(actionName));
+        }
+        log("boat guy: "+ boatGuy.getName());
+        return boatGuy;
+    }
+
+    private void crossPlank() {
+        GameObject plank = getGameObjects().closest(n -> n != null && "Gangplank".equals(n.getName()));
+        while (plank == null) {
+            sleep(Calculations.random(1000, 4000));
+            plank = getGameObjects().closest(n -> n != null && "Gangplank".equals(n.getName()));
+        }
+        log("found plank, crossing...");
+        plank.interact("Cross");
     }
 
     private void goToKaramja() {
@@ -95,18 +108,10 @@ public class HarpoonerMain extends AbstractScript {
                 sleep(Calculations.random(3000, 6000));
             }
         }
-        NPC boatGuy = getNpcs().closest(
-                n -> n != null && Arrays.toString(n.getActions()).contains("Pay-fare"));
+        NPC boatGuy = getBoatGuy("Pay-fare");
         boatGuy.interact("Pay-fare");
         sleep(Calculations.random(5000, 7000));
-        GameObject plank = getGameObjects().closest("Gangplank");
-        while (plank == null) {
-            sleep(Calculations.random(1000, 4000));
-            plank = getGameObjects().closest("Gangplank");
-        }
-        log("found plank, crossing...");
-        plank.interact("Cross");
-        plank.interact();
+        crossPlank();
         sleep(Calculations.random(1500, 4000));
 
     }
@@ -121,7 +126,8 @@ public class HarpoonerMain extends AbstractScript {
 
     }
 
-    private void getMeSomeFish(String nameOfTile){
+    private void getMeSomeFish(){
+        randomCameraMovement();
         log("Trying to get some fish.");
         NPC fishingSpot = getNpcs().closest(
                 n -> n != null && Arrays.toString(n.getActions()).contains("Harpoon") && Arrays.toString(n.getActions()).contains("Cage"));
@@ -129,8 +135,7 @@ public class HarpoonerMain extends AbstractScript {
 
         if(fishingSpot != null && fishingSpot.interact("Harpoon")){
             log("Found fishing spot: " + fishingSpot.getName() + " Coordinates: "+ fishingSpot.getGridX() + " - " + fishingSpot.getGridY());
-            sleepUntil(() -> getLocalPlayer().isStandingStill(), Calculations.random(14000, 31000));
-            randomCameraMovement();
+            sleepUntil(() -> getLocalPlayer().isStandingStill(), Calculations.random(60000, 90000));
         }
     }
 
@@ -156,7 +161,7 @@ public class HarpoonerMain extends AbstractScript {
     }
 
     private void testCode(){
-        goToKaramja();
+        crossPlank();
     }
 
     private void depositLoot(){
@@ -164,7 +169,7 @@ public class HarpoonerMain extends AbstractScript {
 
         while(!getDepositBox().open()){
             randomCameraMovement();
-            sleep(Calculations.random(1000, 4000));
+            sleep(Calculations.random(1000, 2000));
         }
         if (getDepositBox().isOpen()) {
             getDepositBox().depositAll("Raw tuna");
