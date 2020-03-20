@@ -35,6 +35,7 @@ public class HarpoonerMain extends AbstractScript {
 
         if(!getInventory().isFull()){
             if(pierArea.contains(getLocalPlayer())){
+                dropTunas();
                 getMeSomeFish("Fishing spot"); //change "Tree" to the name of your tree.
             }else{
                 if(getWalking().walk(pierArea.getRandomTile())){
@@ -61,6 +62,10 @@ public class HarpoonerMain extends AbstractScript {
         }
 
         return 600;
+    }
+
+    private void dropTunas() {
+        getInventory().dropAll((item) -> item != null && ("Raw tuna").equals(item.getName()) );
     }
 
     private void goToMainland() {
