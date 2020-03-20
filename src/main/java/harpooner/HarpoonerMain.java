@@ -112,7 +112,7 @@ public class HarpoonerMain extends AbstractScript {
         boatGuy.interact("Pay-fare");
         sleep(Calculations.random(5000, 7000));
         crossPlank();
-        sleep(Calculations.random(1500, 4000));
+        sleep(Calculations.random(3000, 4000));
 
     }
 
