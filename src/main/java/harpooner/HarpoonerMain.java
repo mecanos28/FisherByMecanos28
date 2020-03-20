@@ -49,7 +49,6 @@ public class HarpoonerMain extends AbstractScript {
         if(getInventory().isFull()){ //it is time to bank
             if(boatIslandArea.contains(getLocalPlayer())){
                 goToMainland();
-                depositLoot();
                 goToKaramja();
             }else{
                 if(getWalking().walk(boatIslandArea.getRandomTile())){
@@ -65,12 +64,23 @@ public class HarpoonerMain extends AbstractScript {
     }
 
     private void goToMainland() {
-        NPC boatGuy = getNpcs().closest(
-                n -> n != null && Arrays.toString(n.getActions()).contains("Pay-fare"));
-        boatGuy.interact("Pay-Fare");
-        sleep(Calculations.random(3000, 6000));
-        GameObject plank = getGameObjects().closest(n -> n != null && n.getID() == 2084);
-        plank.interact();
+        if(getLocalPlayer().distance(boatMainlandArea.getRandomTile()) > Calculations.random(3, 6)) {
+            log("going to mainland...");
+            NPC boatGuy = getNpcs().closest(
+                    n -> n != null && Arrays.toString(n.getActions()).contains("Pay-Fare"));
+            boatGuy.interact("Pay-Fare");
+            sleep(Calculations.random(5000, 7000));
+            GameObject plank = getGameObjects().closest("Gangplank");
+            while (plank == null) {
+                sleep(Calculations.random(1000, 4000));
+                plank = getGameObjects().closest("Gangplank");
+            }
+            log("found plank, crossing...");
+            plank.interact();
+            sleep(Calculations.random(1500, 4000));
+        }
+        log("depositing loot...");
+        depositLoot();
     }
 
     private void goToKaramja() {
@@ -82,10 +92,17 @@ public class HarpoonerMain extends AbstractScript {
         }
         NPC boatGuy = getNpcs().closest(
                 n -> n != null && Arrays.toString(n.getActions()).contains("Pay-fare"));
-        boatGuy.interact("Pay-Fare");
+        boatGuy.interact("Pay-fare");
         sleep(Calculations.random(5000, 7000));
-        GameObject plank = getGameObjects().closest(n -> n != null && n.getID() == 2082);
+        GameObject plank = getGameObjects().closest("Gangplank");
+        while (plank == null) {
+            sleep(Calculations.random(1000, 4000));
+            plank = getGameObjects().closest("Gangplank");
+        }
+        log("found plank, crossing...");
+        plank.interact("Cross");
         plank.interact();
+        sleep(Calculations.random(1500, 4000));
 
     }
 
@@ -139,11 +156,18 @@ public class HarpoonerMain extends AbstractScript {
 
     private void depositLoot(){
         randomCameraMovement();
-        getDepositBox().open();
-        if(getDepositBox().isOpen()){
+
+        while(!getDepositBox().open()){
+            randomCameraMovement();
+            sleep(Calculations.random(1000, 4000));
+        }
+        if (getDepositBox().isOpen()) {
             getDepositBox().depositAll("Raw tuna");
             getDepositBox().depositAll("Raw swordfish");
+            getDepositBox().depositAll(item -> item != null && !item.getName().equals("Coins") && !item.getName().equals("Harpoon"));
         }
         getDepositBox().close();
+
+        sleep(Calculations.random(1000, 4000));
     }
 }
