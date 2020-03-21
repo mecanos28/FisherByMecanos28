@@ -85,23 +85,23 @@ public class HarpoonerMain extends AbstractScript implements MessageListener {
 
         BasicStroke stroke1 = new BasicStroke(1);
 
-        Font font1 = new Font("Helvetica", 1, 13);
-        Font font2 = new Font("Helvetica", 0, 12);
+        Font font1 = new Font("TimesRoman", 0, 12);
+        Font font2 = new Font("TimesRoman", 0, 11);
 
         Graphics2D g = (Graphics2D) graphics;
         g.setColor(color1);
-        g.fillRoundRect(7, 7, 180, 130, 10, 10);
+        g.fillRoundRect(15, 15, 160, 120, 5, 5);
         g.setColor(color2);
         g.setStroke(stroke1);
-        g.drawRoundRect(7, 7, 180, 130, 10, 10);
+        g.drawRoundRect(15, 15, 160, 120, 5, 55);
         g.setFont(font1);
-        g.drawString("Karamja Fisher by Fernando", 15, 20);
+        g.drawString("Karamja Fisher by Fernando", 28, 30);
         g.setFont(font2);
-        g.drawString("Time Running: " + t.formatTime(), 9, 50);
-        g.drawString("Fish catched:" + fishCatched + " Swordfish: " + swordfishCatched, 9, 65);
-        g.drawString("Levels gained: " + levelsGained, 9, 80);
-        g.drawString("Fishing XP/H: " + getSkillTracker().getGainedExperiencePerHour(Skill.FISHING), 9, 95);
-        g.drawString("Status: " + status, 9, 110);
+        g.drawString("Time Running: " + t.formatTime(), 29, 50);
+        g.drawString("Fish catched:" + fishCatched + " Swordfish: " + swordfishCatched, 29, 65);
+        g.drawString("Levels gained: " + levelsGained + " | Current level: " + getSkillTracker().getStartLevel(Skill.FISHING), 29, 80);
+        g.drawString("Fishing XP/H: " + getSkillTracker().getGainedExperiencePerHour(Skill.FISHING), 29, 95);
+        g.drawString("Status: " + status, 29, 110);
 
     }
 
