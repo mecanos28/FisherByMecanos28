@@ -1,24 +1,41 @@
 package harpooner;
 
+import harpooner.helpers.CoinsHelper;
+import harpooner.helpers.FishHelper;
+import harpooner.helpers.TravelHelper;
 import org.dreambot.api.methods.Calculations;
 import org.dreambot.api.methods.map.Area;
+import org.dreambot.api.methods.skills.Skill;
 import org.dreambot.api.script.AbstractScript;
 import org.dreambot.api.script.Category;
 import org.dreambot.api.script.ScriptManifest;
-import org.dreambot.api.wrappers.interactive.GameObject;
-import org.dreambot.api.wrappers.interactive.NPC;
+import org.dreambot.api.script.listener.MessageListener;
+import org.dreambot.api.utilities.Timer;
+import org.dreambot.api.wrappers.widgets.message.Message;
 
 import java.awt.*;
-import java.util.Arrays;
 
 @ScriptManifest(category = Category.FISHING, name = "Harpooner", author = "Fernando", version = 1.0)
-public class HarpoonerMain extends AbstractScript {
+public class HarpoonerMain extends AbstractScript implements MessageListener {
 
-    Area fishingPierArea = new Area(2925, 3180, 2924, 3175, 0);
-    Area karamjaPierArea =  new Area(2949, 3147, 2959, 3146, 0);
-    Area sarimPierArea =  new Area(3029, 3220, 3026, 3215, 0);
-    Area boatKaramja =  new Area(2962, 3143, 2952, 3139, 1);
-    Area boatSarim =  new Area(3032, 3223, 3036, 3213, 1);
+    public final Area fishingPierArea = new Area(2925, 3180, 2924, 3175, 0);
+    public final Area karamjaPierArea =  new Area(2949, 3147, 2959, 3146, 0);
+    public final Area sarimPierArea =  new Area(3029, 3220, 3026, 3215, 0);
+    public final Area boatKaramja =  new Area(2962, 3143, 2952, 3139, 1);
+    public final Area boatSarim =  new Area(3032, 3223, 3036, 3213, 1);
+    public final Area generalStore =  new Area(2947, 3212, 2949, 3218, 0);
+
+    private Timer t = new Timer();
+
+    public TravelHelper traveler;
+    public FishHelper fisher;
+    public CoinsHelper moneyMaker;
+
+
+    public int fishCatched;
+    public int swordfishCatched;
+    public int levelsGained;
+    public String status;
 
     public enum States {
         FISHING,
@@ -26,12 +43,26 @@ public class HarpoonerMain extends AbstractScript {
         OUTSIDE_BOAT_KARAMJA,
         INSIDE_BOAT_PORT_SARIM,
         OUTSIDE_BOAT_PORT_SARIM_BANK,
-        OUTSIDE_BOAT_PORT_SARIM_PAY_FARE
+        OUTSIDE_BOAT_PORT_SARIM_SELL,
+        OUTSIDE_BOAT_PORT_SARIM_PAY_FARE,
+        IN_GENERAL_STORE_WITH_MONEY,
+        IN_GENERAL_STORE_WITHOUT_MONEY,
     }
 
     @Override
     public void onStart(){
-        log("Hi");
+        log("Hi, thanks for testing this Karamja harpoon script.");
+
+        getSkillTracker().resetAll();
+        getSkillTracker().start();
+        fishCatched = 0;
+        swordfishCatched = 0;
+        status = "Starting script...";
+
+
+        traveler = new TravelHelper(this);
+        fisher = new FishHelper(this);
+        moneyMaker = new CoinsHelper(this);
     }
 
     @Override
@@ -43,39 +74,116 @@ public class HarpoonerMain extends AbstractScript {
 
     @Override
     public void onExit() {
-        log("Bye");
+        log("Bye, thanks for testing this Karamja harpoon script.");
     }
 
     @Override
     public void onPaint(Graphics graphics) {
 
+        Color color1 = new Color(130, 128, 255);
+        Color color2 = new Color(0, 0, 0);
+
+        BasicStroke stroke1 = new BasicStroke(1);
+
+        Font font1 = new Font("Helvetica", 1, 13);
+        Font font2 = new Font("Helvetica", 0, 12);
+
+        Graphics2D g = (Graphics2D) graphics;
+        g.setColor(color1);
+        g.fillRoundRect(7, 7, 180, 130, 10, 10);
+        g.setColor(color2);
+        g.setStroke(stroke1);
+        g.drawRoundRect(7, 7, 180, 130, 10, 10);
+        g.setFont(font1);
+        g.drawString("Karamja Fisher by Fernando", 15, 20);
+        g.setFont(font2);
+        g.drawString("Time Running: " + t.formatTime(), 9, 50);
+        g.drawString("Fish catched:" + fishCatched + " Swordfish: " + swordfishCatched, 9, 65);
+        g.drawString("Levels gained: " + levelsGained, 9, 80);
+        g.drawString("Fishing XP/H: " + getSkillTracker().getGainedExperiencePerHour(Skill.FISHING), 9, 95);
+        g.drawString("Status: " + status, 9, 110);
+
+    }
+
+    @Override
+    public void onGameMessage(Message message) {
+        if(message.getMessage() != null && (message.getMessage().toLowerCase().contains("you catch a"))){
+            fishCatched++;
+            if (message.getMessage().toLowerCase().contains("swordfish")){
+                swordfishCatched++;
+            }
+        }
+        if(message.getMessage() != null && (message.getMessage().toLowerCase().contains("advanced your fishing level"))){
+            levelsGained++;
+        }
+    }
+
+    @Override
+    public void onPlayerMessage(Message message) {
+
+    }
+
+    @Override
+    public void onTradeMessage(Message message) {
+
+    }
+
+    @Override
+    public void onPrivateInMessage(Message message) {
+
+    }
+
+    @Override
+    public void onPrivateOutMessage(Message message) {
+
     }
 
 
     private States getCurrentHarpoonState(){
-        if(!hasFullInventory() && isInKaramjaIsland() && !isInsideKaramjaBoat()){
+        if(!traveler.hasFullInventory() && traveler.isInKaramjaIsland() && !traveler.isInsideKaramjaBoat()){
             log("Trying to go fish...");
+            status = "Trying to go fish...";
             return States.FISHING;
         }
-        else if (!hasFullInventory() && isInKaramjaIsland() && isInsideKaramjaBoat()){
+        else if (!traveler.hasFullInventory() && traveler.isInKaramjaIsland() && traveler.isInsideKaramjaBoat()){
             log("Trying to leave boat...");
+            status = "Trying to leave boat...";
             return States.INSIDE_BOAT_KARAMJA;
         }
-        else if (hasFullInventory() && isInKaramjaIsland() && !isInsideKaramjaBoat()){
+        else if (traveler.hasFullInventory() && traveler.isInKaramjaIsland() && !traveler.isInsideKaramjaBoat()){
             log("Trying to pay fare...");
+            status = "Trying to pay fare...";
             return States.OUTSIDE_BOAT_KARAMJA;
         }
-        else if (hasFullInventory() && isInPortSarim() && isInsidePortSarimBoat()){
+        else if (traveler.hasFullInventory() && traveler.isInPortSarim() && traveler.isInsidePortSarimBoat()){
             log("Trying to leave boat...");
+            status = "Trying to leave boat...";
             return States.INSIDE_BOAT_PORT_SARIM;
         }
-        else if (hasFullInventory() && isInPortSarim() && !isInsidePortSarimBoat()){
+        else if (traveler.hasFullInventory() && traveler.isInPortSarim() && !traveler.isInsidePortSarimBoat() && moneyMaker.haveCoinsForNextTravel()){
             log("Trying to bank fish...");
+            status = "Trying to bank fish...";
             return States.OUTSIDE_BOAT_PORT_SARIM_BANK;
         }
-        else if (!hasFullInventory() && isInPortSarim() && !isInsidePortSarimBoat()){
-            log("Trying to travel to Karamja..");
+        else if (traveler.hasFullInventory() && traveler.isInPortSarim() && !traveler.isInsidePortSarimBoat() && !moneyMaker.haveCoinsForNextTravel()){
+            log("No Coins... Selling fish...");
+            status = "Trying to sell fish...";
+            return States.OUTSIDE_BOAT_PORT_SARIM_SELL;
+        }
+        else if (!traveler.hasFullInventory() && traveler.isInPortSarim() && !traveler.isInsidePortSarimBoat()){
+            log("Trying to travel to Karamja...");
+            status = "Trying to travel to Karamja...";
             return States.OUTSIDE_BOAT_PORT_SARIM_PAY_FARE;
+        }
+        else if (!traveler.hasFullInventory() && traveler.isInGeneralStore() && moneyMaker.haveCoinsForNextTravel() ){
+            log("In general store with new money... Going to Karamja.");
+            status = "New money... Going to Karamja.";
+            return States.IN_GENERAL_STORE_WITH_MONEY;
+        }
+        else if (!traveler.hasFullInventory() && traveler.isInGeneralStore() && !moneyMaker.haveCoinsForNextTravel() ){
+            log("In general store with new money... Going to Karamja.");
+            status = "New money... Going to Karamja.";
+            return States.IN_GENERAL_STORE_WITHOUT_MONEY;
         }
         return null;
     }
@@ -84,209 +192,44 @@ public class HarpoonerMain extends AbstractScript {
         randomCameraMovement();
         switch(curentState) {
             case FISHING:
-                activateFishing();
+                fisher.activateFishing();
                 break;
             case INSIDE_BOAT_KARAMJA:
             case INSIDE_BOAT_PORT_SARIM:
-                crossPlank();
+                traveler.crossPlank();
                 break;
             case OUTSIDE_BOAT_KARAMJA:
-                walkToKaramjaPier();
-                payFareToPortSarim();
+                traveler.walkToKaramjaPier();
+                traveler.payFareToPortSarim();
                 break;
             case OUTSIDE_BOAT_PORT_SARIM_BANK:
-                depositLoot();
+                traveler.depositLoot();
                 break;
             case OUTSIDE_BOAT_PORT_SARIM_PAY_FARE:
-                walkToPortSarimPier();
-                payFareToKaramja();
+            case IN_GENERAL_STORE_WITH_MONEY:
+                traveler.walkToPortSarimPier();
+                traveler.payFareToKaramja();
+                break;
+            case OUTSIDE_BOAT_PORT_SARIM_SELL:
+                traveler.walkToGeneralStore();
+                break;
+            case IN_GENERAL_STORE_WITHOUT_MONEY:
+                moneyMaker.sellFish();
                 break;
             default:
-                // code block
+                log("Program has bugged out. :(");
         }
 
     }
 
-    private void walkToKaramjaPier() {
-        while (!karamjaPierArea.contains(getLocalPlayer())) {
-            getWalking().walk(karamjaPierArea.getRandomTile());
-            sleepUntil(() -> !getLocalPlayer().isMoving(), 5200);
-        }
-    }
-
-    private void walkToPortSarimPier() {
-        while (!sarimPierArea.contains(getLocalPlayer())) {
-            getWalking().walk(sarimPierArea.getRandomTile());
-            sleepUntil(() -> !getLocalPlayer().isMoving(), 5200);
-        }
-    }
-
-    private void payFareToPortSarim() {
-        log("Going to mainland...");
-        NPC boatGuy = getBoatGuy("Pay-Fare");
-        boatGuy.interact("Pay-Fare");
-        log("Payed fare...");
-        sleep(Calculations.random(7000, 9000));
-    }
-
-    private void payFareToKaramja() {
-        log("Going to island...");
-        NPC boatGuy = getBoatGuy("Pay-fare");
-        boatGuy.interact("Pay-fare");
-        log("Payed fare...");
-        sleep(Calculations.random(7000, 9000));
-    }
-
-    private boolean isInsidePortSarimBoat() {
-        return boatSarim.contains(getLocalPlayer());
-    }
-
-    private boolean isInPortSarim() {
-        return getLocalPlayer().distance(sarimPierArea.getCenter()) < 60;
-    }
-
-    private boolean hasFullInventory() {
-        return getInventory().isFull();
-    }
-
-    private boolean isInKaramjaIsland() {
-        return getLocalPlayer().distance(karamjaPierArea.getCenter()) < 60;
-    }
-
-    private boolean isInsideKaramjaBoat() {
-        return boatKaramja.contains(getLocalPlayer());
-    }
-
-
-
-    private void activateFishing() {
-        if(fishingPierArea.contains(getLocalPlayer())){
-            dropTunas();
-            getMeSomeFish();
-        }else{
-            if(getWalking().walk(fishingPierArea.getRandomTile())){
-                sleep(Calculations.random(3000, 5500));
-            }
-        }
-    }
-
-    private void dropTunas() {
-        log("dropping tunas...");
-        getInventory().dropAll((item) -> item != null && ("Raw tuna").equals(item.getName()) );
-    }
-
-
-
-    private NPC getBoatGuy(String actionName) {
-        NPC boatGuy = getNpcs().closest(
-                n -> n != null && Arrays.toString(n.getActions()).contains(actionName));
-        while (boatGuy == null) {
-            log("trying to get boat guy...");
-            sleep(Calculations.random(1000, 4000));
-            boatGuy = getNpcs().closest(
-                    n -> n != null && Arrays.toString(n.getActions()).contains(actionName));
-        }
-        log("boat guy: "+ boatGuy.getName());
-        return boatGuy;
-    }
-
-    private void crossPlank() {
-        GameObject plank = getGameObjects().closest(n -> n != null && "Gangplank".equals(n.getName()));
-        while (plank == null) {
-            sleep(Calculations.random(1000, 2000));
-            plank = getGameObjects().closest(n -> n != null && "Gangplank".equals(n.getName()));
-        }
-        log("Found plank, crossing...");
-        plank.interact("Cross");
-        sleep(Calculations.random(1500, 4000));
-    }
-
-    private void depositLoot(){
-        log("depositing loot...");
-        randomCameraMovement();
-
-        while(!getDepositBox().open()){
-            randomCameraMovement();
-            sleep(Calculations.random(1000, 2000));
-        }
-        if (getDepositBox().isOpen()) {
-            getDepositBox().depositAll("Raw tuna");
-            getDepositBox().depositAll("Raw swordfish");
-            getDepositBox().depositAll(item -> item != null && !item.getName().equals("Coins") && !item.getName().equals("Harpoon"));
-        }
-        getDepositBox().close();
-
-        sleep(Calculations.random(1000, 4000));
-    }
-
-    private void getMeSomeFish(){
-        randomCameraMovement();
-        log("Trying to get some fish.");
-        NPC fishingSpot = getNpcs().closest(
-                n -> n != null && Arrays.toString(n.getActions()).contains("Harpoon") && Arrays.toString(n.getActions()).contains("Cage"));
-
-
-        if(fishingSpot != null && fishingSpot.interact("Harpoon")){
-            log("Found fishing spot: " + fishingSpot.getName() + " Coordinates: "+ fishingSpot.getGridX() + " - " + fishingSpot.getGridY());
-            sleepUntil(() -> getLocalPlayer().getAnimation() == -1, Calculations.random(10000, 25000));
-        }
-    }
-
-    private void randomCameraMovement() {
+    public void randomCameraMovement() {
         if(Calculations.random(0, 9) > 4){
             getCamera().rotateTo(Calculations.random(2400), Calculations.random(getClient().getLowestPitch(), 384));
         }
     }
 
-    private void goToKaramja() {
-        while(! sarimPierArea.contains(getLocalPlayer())){
-            if(getWalking().walk(sarimPierArea.getRandomTile())){
-                randomCameraMovement();
-                sleep(Calculations.random(3000, 6000));
-            }
-        }
-        NPC boatGuy = getBoatGuy("Pay-fare");
-        boatGuy.interact("Pay-fare");
-        sleep(Calculations.random(5000, 7000));
-        crossPlank();
-        sleep(Calculations.random(3000, 4000));
-
-    }
-    private void goToMainland() {
-        if(getLocalPlayer().distance(sarimPierArea.getRandomTile()) > Calculations.random(3, 6)) {
-            log("going to mainland...");
-            NPC boatGuy = getBoatGuy("Pay-Fare");
-            boatGuy.interact("Pay-Fare");
-            log("payed fare...");
-            sleep(Calculations.random(7000, 9000));
-            crossPlank();
-            sleep(Calculations.random(1500, 4000));
-        }
-        log("depositing loot...");
-        depositLoot();
-    }
-
-
-
-
-
-    private void bank(){
-        NPC banker = getNpcs().closest(npc -> npc != null && npc.hasAction("Bank"));
-        if(banker != null && banker.interact("Bank")){
-            if(sleepUntil(() -> getBank().isOpen(), 9000)){
-                if(getBank().depositAllExcept(item -> item != null && item.getName().contains("axe"))){
-                    if(sleepUntil(() -> !hasFullInventory(), 8000)){
-                        if(getBank().close()){
-                            sleepUntil(() -> !getBank().isOpen(), 8000);
-                        }
-                    }
-                }
-            }
-        }
-    }
 
     private void testCode(){
-        crossPlank();
     }
 
 
