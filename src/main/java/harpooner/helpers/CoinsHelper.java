@@ -23,11 +23,16 @@ public class CoinsHelper extends Helper {
     }
 
     public void sellFish() {
+        log("Trading...");
+        m.status="Opening trade window...";
         openTradeWindow();
         m.sleep(Calculations.random(4000, 7000));
+        m.status="Selling fish...";
         sellRawFish();
         m.sleep(Calculations.random(2000, 2500));
         if(!haveCoinsForNextTravel()){
+            log("Logged out, no more coins...");
+            m.status="Logging out..";
             m.getTabs().logout();
             m.sleep(5000);
             m.onExit();
