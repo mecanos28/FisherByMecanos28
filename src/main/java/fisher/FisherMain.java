@@ -1,8 +1,9 @@
-package harpooner;
+package fisher;
 
-import harpooner.helpers.CoinsHelper;
-import harpooner.helpers.FishHelper;
-import harpooner.helpers.TravelHelper;
+import fisher.helpers.CoinsHelper;
+import fisher.helpers.FishHelper;
+import fisher.helpers.FisherGUI;
+import fisher.helpers.TravelHelper;
 import org.dreambot.api.methods.Calculations;
 import org.dreambot.api.methods.map.Area;
 import org.dreambot.api.methods.skills.Skill;
@@ -13,10 +14,11 @@ import org.dreambot.api.script.listener.MessageListener;
 import org.dreambot.api.utilities.Timer;
 import org.dreambot.api.wrappers.widgets.message.Message;
 
+import javax.swing.*;
 import java.awt.*;
 
 @ScriptManifest(category = Category.FISHING, name = "Harpooner", author = "Fernando", version = 1.0)
-public class HarpoonerMain extends AbstractScript implements MessageListener {
+public class FisherMain extends AbstractScript implements MessageListener {
 
     public final Area fishingPierArea = new Area(2925, 3180, 2924, 3175, 0);
     public final Area karamjaPierArea =  new Area(2949, 3147, 2959, 3146, 0);
@@ -37,6 +39,17 @@ public class HarpoonerMain extends AbstractScript implements MessageListener {
     public int levelsGained;
     public String status;
 
+    public boolean isShouldStart() {
+        return shouldStart;
+    }
+
+    public void setShouldStart(boolean shouldStart) {
+        this.shouldStart = shouldStart;
+    }
+
+    private boolean shouldStart;
+    private FisherGUI gui;
+
     public enum States {
         FISHING,
         INSIDE_BOAT_KARAMJA,
@@ -49,15 +62,21 @@ public class HarpoonerMain extends AbstractScript implements MessageListener {
         IN_GENERAL_STORE_WITHOUT_MONEY,
     }
 
+    private void initGUI(){
+        gui = new FisherGUI(this);
+        gui.setVisible(true);
+    }
+
     @Override
     public void onStart(){
-        log("Hi, thanks for testing this Karamja harpoon script.");
+        log("Hi, thanks for testing this Fishing script.");
+        initGUI();
 
         getSkillTracker().resetAll();
         getSkillTracker().start();
         fishCatched = 0;
-        swordfishCatched = 0;
         status = "Starting script...";
+        shouldStart = false;
 
 
         traveler = new TravelHelper(this);
@@ -67,9 +86,11 @@ public class HarpoonerMain extends AbstractScript implements MessageListener {
 
     @Override
     public int onLoop() {
-        States state = getCurrentHarpoonState();
-        processHarpoonState(state);
-        return 600;
+        if(shouldStart){
+            States state = getCurrentHarpoonState();
+            processHarpoonState(state);
+        }
+        return 200;
     }
 
     @Override
@@ -98,7 +119,7 @@ public class HarpoonerMain extends AbstractScript implements MessageListener {
         g.drawString("Karamja Fisher by Fernando", 28, 30);
         g.setFont(font2);
         g.drawString("Time Running: " + t.formatTime(), 29, 50);
-        g.drawString("Fish catched:" + fishCatched + " Swordfish: " + swordfishCatched, 29, 65);
+        g.drawString("Fish catched:" + fishCatched, 29, 65);
         g.drawString("Levels gained: " + levelsGained + " | Current level: " + getSkillTracker().getStartLevel(Skill.FISHING), 29, 80);
         g.drawString("Fishing XP/H: " + getSkillTracker().getGainedExperiencePerHour(Skill.FISHING), 29, 95);
         g.drawString("Status: " + status, 29, 110);
@@ -109,9 +130,6 @@ public class HarpoonerMain extends AbstractScript implements MessageListener {
     public void onGameMessage(Message message) {
         if(message.getMessage() != null && (message.getMessage().toLowerCase().contains("you catch a"))){
             fishCatched++;
-            if (message.getMessage().toLowerCase().contains("swordfish")){
-                swordfishCatched++;
-            }
         }
         if(message.getMessage() != null && (message.getMessage().toLowerCase().contains("advanced your fishing level"))){
             levelsGained++;

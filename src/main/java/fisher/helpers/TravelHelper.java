@@ -1,10 +1,10 @@
-package harpooner.helpers;
+package fisher.helpers;
 
-import harpooner.HarpoonerMain;
+import fisher.FisherMain;
 import org.dreambot.api.methods.Calculations;
+import org.dreambot.api.methods.map.Area;
 import org.dreambot.api.wrappers.interactive.GameObject;
 import org.dreambot.api.wrappers.interactive.NPC;
-import org.dreambot.api.wrappers.widgets.WidgetChild;
 
 import java.util.Arrays;
 
@@ -13,7 +13,7 @@ import static org.dreambot.api.methods.MethodProvider.sleepUntil;
 
 public class TravelHelper extends Helper {
 
-    public TravelHelper(HarpoonerMain m) {
+    public TravelHelper(FisherMain m) {
         super(m);
     }
 
@@ -38,6 +38,14 @@ public class TravelHelper extends Helper {
         while (!m.generalStore.contains(m.getLocalPlayer())) {
             m.status = "Walking to General Store...";
             m.getWalking().walk(m.generalStore.getRandomTile());
+            sleepUntil(() -> !m.getLocalPlayer().isMoving(), 5200);
+        }
+    }
+
+    public void walkToArea(Area area) {
+        while (!area.contains(m.getLocalPlayer())) {
+            m.status = "Walking...";
+            m.getWalking().walk(area.getRandomTile());
             sleepUntil(() -> !m.getLocalPlayer().isMoving(), 5200);
         }
     }

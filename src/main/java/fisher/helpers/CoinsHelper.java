@@ -1,17 +1,15 @@
-package harpooner.helpers;
+package fisher.helpers;
 
-import harpooner.HarpoonerMain;
+import fisher.FisherMain;
 import org.dreambot.api.methods.Calculations;
 import org.dreambot.api.wrappers.interactive.NPC;
 import org.dreambot.api.wrappers.widgets.WidgetChild;
-
-import java.util.Arrays;
 
 import static org.dreambot.api.methods.MethodProvider.log;
 
 public class CoinsHelper extends Helper {
 
-    public CoinsHelper(HarpoonerMain m) {
+    public CoinsHelper(FisherMain m) {
         super(m);
     }
 

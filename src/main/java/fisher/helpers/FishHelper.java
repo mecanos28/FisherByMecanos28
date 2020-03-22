@@ -1,6 +1,6 @@
-package harpooner.helpers;
+package fisher.helpers;
 
-import harpooner.HarpoonerMain;
+import fisher.FisherMain;
 import org.dreambot.api.methods.Calculations;
 import org.dreambot.api.wrappers.interactive.NPC;
 
@@ -8,7 +8,7 @@ import java.util.Arrays;
 
 public class FishHelper extends Helper {
 
-    public FishHelper(HarpoonerMain m) {
+    public FishHelper(FisherMain m) {
         super(m);
     }
 
