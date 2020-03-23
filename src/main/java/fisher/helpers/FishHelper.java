@@ -12,16 +12,50 @@ public class FishHelper extends Helper {
         super(m);
     }
 
-    public void activateFishing() {
-        if(m.fishingPierArea.contains(m.getLocalPlayer())){
+    public void activateHarpoonFisher() {
+        if(inKaramjaFishingArea()){
             dropTunas();
-            getMeSomeFish();
+            getMeSomeSwordfish();
         }else{
             m.status = "Walking to get some fish...";
             if(m.getWalking().walk(m.fishingPierArea.getRandomTile())){
                 m.sleep(Calculations.random(3000, 5500));
             }
         }
+    }
+
+    public void activateLumbridgeShrimpFisher() {
+        if(inLumbridgeShrimpingArea()){
+            getMeSomeShrimp();
+        }else{
+            m.status = "Walking to get some fish...";
+            if(m.getWalking().walk(m.lumbridgeShrimpArea.getRandomTile())){
+                m.sleep(Calculations.random(3000, 5500));
+            }
+        }
+    }
+
+    public void activateDraynorShrimpFisher() {
+        if(inRimmingtonShrimpingArea()){
+            getMeSomeShrimp();
+        }else{
+            m.status = "Walking to get some fish...";
+            if(m.getWalking().walk(m.rimmingtonShrimpArea.getRandomTile())){
+                m.sleep(Calculations.random(3000, 5500));
+            }
+        }
+    }
+
+    private boolean inLumbridgeShrimpingArea() {
+        return m.lumbridgeShrimpArea.contains(m.getLocalPlayer()) || m.getLocalPlayer().distance(m.lumbridgeShrimpArea.getCenter()) < 8;
+    }
+
+    private boolean inRimmingtonShrimpingArea() {
+        return m.rimmingtonShrimpArea.contains(m.getLocalPlayer()) || m.getLocalPlayer().distance(m.rimmingtonShrimpArea.getCenter()) < 3;
+    }
+
+    private boolean inKaramjaFishingArea() {
+        return m.fishingPierArea.contains(m.getLocalPlayer());
     }
 
     public void dropTunas() {
@@ -33,7 +67,7 @@ public class FishHelper extends Helper {
 
     }
 
-    public void getMeSomeFish(){
+    public void getMeSomeSwordfish(){
         m.randomCameraMovement();
         m.log("Trying to get some fish.");
         m.status = "Searching for harpooning spot...";
@@ -45,6 +79,25 @@ public class FishHelper extends Helper {
             m.log("Found fishing spot: " + fishingSpot.getName() + " Coordinates: "+ fishingSpot.getGridX() + " - " + fishingSpot.getGridY());
             m.status = "Fishing! :)";
             m.sleepUntil(() -> m.getLocalPlayer().getAnimation() == -1, Calculations.random(20000, 25000));
+        }
+    }
+
+    public void getMeSomeShrimp(){
+        m.randomCameraMovement();
+        m.log("Trying to get some Shrimp.");
+        m.status = "Searching for shrimping spot...";
+        NPC fishingSpot = m.getNpcs().closest(
+                n -> n != null && Arrays.toString(n.getActions()).contains("Net"));
+
+
+        if(fishingSpot != null && fishingSpot.interact("Net")){
+            m.log("Found fishing spot: " + fishingSpot.getName() + " Coordinates: "+ fishingSpot.getGridX() + " - " + fishingSpot.getGridY());
+            m.status = "Fishing! :)";
+            m.sleep(1000);
+            m.moveCursorOffScreen();
+            if (m.getLocalPlayer().getAnimation() == 621) {
+                m.sleepUntil(() -> m.getLocalPlayer().getAnimation() == -1, 60000);
+            }
         }
     }
 }

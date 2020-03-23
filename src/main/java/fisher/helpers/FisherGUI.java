@@ -26,27 +26,24 @@ public class FisherGUI extends JFrame {
         modeComboBox = new JComboBox<>();
         modeLabel = new JLabel();
 
-        //======== this ========
-        setTitle("Simple WoodCutter GUI");
+        setTitle("Fisher by Fernando");
         Container contentPane = getContentPane();
         contentPane.setLayout(null);
 
-        //---- button1 ----
         startButton.setText("Start");
         startButton.addActionListener(e -> button1ActionPerformed(e));
         contentPane.add(startButton);
         startButton.setBounds(10, 55, 275, 55);
 
-        //---- comboBox1 ----
         modeComboBox.setModel(new DefaultComboBoxModel<>(new String[]{
                 "Lumbridge Shrimp",
-                "Karamja Harpoon"
+                "Karamja Harpoon",
+                "Draynor Shrimp"
         }));
         contentPane.add(modeComboBox);
         modeComboBox.setBounds(15, 10, 185, 35);
 
-        //---- label1 ----
-        modeLabel.setText("Select your mode: ");
+        modeLabel.setText("Select your mode");
         contentPane.add(modeLabel);
         modeLabel.setBounds(new Rectangle(new Point(205, 20), modeLabel.getPreferredSize()));
 
@@ -55,7 +52,8 @@ public class FisherGUI extends JFrame {
         setLocationRelativeTo(getOwner());
     }
 
-    public String getTreeType() {
+    public String getCurrentMode() {
+        ctx.log("Selected Mode: " + modeComboBox.getSelectedItem().toString());
         return modeComboBox.getSelectedItem().toString();
     }
 

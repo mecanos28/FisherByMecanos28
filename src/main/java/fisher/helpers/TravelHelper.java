@@ -35,9 +35,9 @@ public class TravelHelper extends Helper {
     }
 
     public void walkToGeneralStore() {
-        while (!m.generalStore.contains(m.getLocalPlayer())) {
+        while (!m.generalStoreRimmingtonArea.contains(m.getLocalPlayer())) {
             m.status = "Walking to General Store...";
-            m.getWalking().walk(m.generalStore.getRandomTile());
+            m.getWalking().walk(m.generalStoreRimmingtonArea.getRandomTile());
             sleepUntil(() -> !m.getLocalPlayer().isMoving(), 5200);
         }
     }
@@ -84,7 +84,7 @@ public class TravelHelper extends Helper {
     }
 
     public boolean isInsidePortSarimBoat() {
-        return m.boatSarim.contains(m.getLocalPlayer());
+        return m.boatSarimArea.contains(m.getLocalPlayer());
     }
 
     public boolean isInPortSarim() { return m.getLocalPlayer().distance(m.sarimPierArea.getCenter()) < 60; }
@@ -98,10 +98,26 @@ public class TravelHelper extends Helper {
     }
 
     public boolean isInsideKaramjaBoat() {
-        return m.boatKaramja.contains(m.getLocalPlayer());
+        return m.boatKaramjaArea.contains(m.getLocalPlayer());
     }
 
-    public boolean isInGeneralStore() { return m.generalStore.contains(m.getLocalPlayer()); }
+    public boolean isInGeneralStore() { return m.generalStoreRimmingtonArea.contains(m.getLocalPlayer()); }
+
+    public boolean isInGroundLevel() { return m.getLocalPlayer().getZ() == 0; }
+    public boolean isInSecondLevel() { return m.getLocalPlayer().getZ() == 1; }
+    public boolean isInThirdLevel() { return m.getLocalPlayer().getZ() == 2; }
+
+    public void interactWithStaircase(String action){
+        m.status = "Interacting with staircase..." + " " + action;
+        GameObject stairs = m.getGameObjects().closest(n -> n != null && "Staircase".equals(n.getName()));
+        while (stairs == null) {
+            m.sleep(Calculations.random(1000, 2000));
+            stairs = m.getGameObjects().closest(n -> n != null && "Staircase".equals(n.getName()));
+        }
+        stairs.interact(action);
+        m.sleep(Calculations.random(1500, 3000));
+
+    }
 
     public void crossPlank() {
         m.status = "Crossing Gangplank!";
@@ -132,6 +148,25 @@ public class TravelHelper extends Helper {
         }
         m.getDepositBox().close();
 
+        m.sleep(Calculations.random(1000, 4000));
+    }
+
+    public void bankShrimp(){
+        log("Banking.");
+        m.randomCameraMovement();
+
+        while(!m.getBank().open()){
+            m.status = "Opening Bank";
+            m.randomCameraMovement();
+            m.sleep(Calculations.random(1000, 2000));
+        }
+        if (m.getBank().isOpen()) {
+            m.status = "Depositing fish...";
+            m.getBank().depositAll("Raw shrimp");
+            m.getBank().depositAll("Raw anchovies");
+            m.getBank().depositAll(item -> item != null && !item.getName().equals("Small fishing net"));
+        }
+        if(Calculations.random(1, 10) > 4) m.getBank().close();
         m.sleep(Calculations.random(1000, 4000));
     }
 

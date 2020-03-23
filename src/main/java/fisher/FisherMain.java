@@ -14,7 +14,6 @@ import org.dreambot.api.script.listener.MessageListener;
 import org.dreambot.api.utilities.Timer;
 import org.dreambot.api.wrappers.widgets.message.Message;
 
-import javax.swing.*;
 import java.awt.*;
 
 @ScriptManifest(category = Category.FISHING, name = "Harpooner", author = "Fernando", version = 1.0)
@@ -23,9 +22,18 @@ public class FisherMain extends AbstractScript implements MessageListener {
     public final Area fishingPierArea = new Area(2925, 3180, 2924, 3175, 0);
     public final Area karamjaPierArea =  new Area(2949, 3147, 2959, 3146, 0);
     public final Area sarimPierArea =  new Area(3029, 3220, 3026, 3215, 0);
-    public final Area boatKaramja =  new Area(2962, 3143, 2952, 3139, 1);
-    public final Area boatSarim =  new Area(3032, 3223, 3036, 3213, 1);
-    public final Area generalStore =  new Area(2947, 3212, 2949, 3218, 0);
+    public final Area boatKaramjaArea =  new Area(2962, 3143, 2952, 3139, 1);
+    public final Area boatSarimArea =  new Area(3032, 3223, 3036, 3213, 1);
+    public final Area generalStoreRimmingtonArea =  new Area(2947, 3212, 2949, 3218, 0);
+
+    public final Area lumbridgeShrimpArea =  new Area(3243, 3154, 3240, 3150, 0);
+    public final Area lumbridgeFirstFloorStairsArea =  new Area(3206, 3208, 3206, 3209, 0);
+    public final Area lumbridgeSecondFloorStairsArea =  new Area(3205, 3209, 3206, 3209, 1);
+    public final Area lumbridgeThirdFloorStairsArea =  new Area(3205, 3209, 3206, 3209, 2);
+
+    public final Area rimmingtonShrimpArea =  new Area(3087, 3227, 3087, 3230, 0);
+
+
 
     private Timer t = new Timer();
 
@@ -33,9 +41,12 @@ public class FisherMain extends AbstractScript implements MessageListener {
     public FishHelper fisher;
     public CoinsHelper moneyMaker;
 
+    private KaramjaHarpooner karamjaHarpooner;
+    private LumbridgeShrimper lumbridgeShrimper;
+    private DraynorShrimper draynorShrimper;
+
 
     public int fishCatched;
-    public int swordfishCatched;
     public int levelsGained;
     public String status;
 
@@ -50,21 +61,29 @@ public class FisherMain extends AbstractScript implements MessageListener {
     private boolean shouldStart;
     private FisherGUI gui;
 
-    public enum States {
-        FISHING,
-        INSIDE_BOAT_KARAMJA,
-        OUTSIDE_BOAT_KARAMJA,
-        INSIDE_BOAT_PORT_SARIM,
-        OUTSIDE_BOAT_PORT_SARIM_BANK,
-        OUTSIDE_BOAT_PORT_SARIM_SELL,
-        OUTSIDE_BOAT_PORT_SARIM_PAY_FARE,
-        IN_GENERAL_STORE_WITH_MONEY,
-        IN_GENERAL_STORE_WITHOUT_MONEY,
-    }
+
 
     private void initGUI(){
         gui = new FisherGUI(this);
         gui.setVisible(true);
+    }
+
+    private void processMode(String mode){
+        switch (mode){
+            case ("Lumbridge Shrimp"):
+                LumbridgeShrimper.ShrimperStates shrimpingState = lumbridgeShrimper.getCurrentShriperState();
+                lumbridgeShrimper.processShrimpState(shrimpingState);
+                break;
+            case ("Karamja Harpoon"):
+                KaramjaHarpooner.HarpooningStates harpooningState = karamjaHarpooner.getCurrentHarpoonState();
+                karamjaHarpooner.processHarpoonState(harpooningState);
+                break;
+            case ("Draynor Shrimp"):
+                DraynorShrimper.RimmingtonShrimperStates draynorShrimperState = draynorShrimper.getCurrentShriperState();
+                draynorShrimper.processShrimpState(draynorShrimperState);
+                break;
+            default:
+        }
     }
 
     @Override
@@ -82,13 +101,17 @@ public class FisherMain extends AbstractScript implements MessageListener {
         traveler = new TravelHelper(this);
         fisher = new FishHelper(this);
         moneyMaker = new CoinsHelper(this);
+
+        karamjaHarpooner = new KaramjaHarpooner(this);
+        lumbridgeShrimper = new LumbridgeShrimper(this);
+        draynorShrimper = new DraynorShrimper(this);
     }
 
     @Override
     public int onLoop() {
-        if(shouldStart){
-            States state = getCurrentHarpoonState();
-            processHarpoonState(state);
+        if(shouldStart ){
+            log("Executing new loop :D");
+            processMode(gui.getCurrentMode());
         }
         return 200;
     }
@@ -101,7 +124,7 @@ public class FisherMain extends AbstractScript implements MessageListener {
     @Override
     public void onPaint(Graphics graphics) {
 
-        Color color1 = new Color(130, 128, 255);
+        Color color1 = new Color(255, 103, 244, 41);
         Color color2 = new Color(0, 0, 0);
 
         BasicStroke stroke1 = new BasicStroke(1);
@@ -111,12 +134,12 @@ public class FisherMain extends AbstractScript implements MessageListener {
 
         Graphics2D g = (Graphics2D) graphics;
         g.setColor(color1);
-        g.fillRoundRect(15, 15, 160, 120, 5, 5);
+        g.fillRoundRect(15, 15, 190, 120, 5, 5);
         g.setColor(color2);
         g.setStroke(stroke1);
-        g.drawRoundRect(15, 15, 160, 120, 5, 55);
+        g.drawRoundRect(15, 15, 190, 120, 5, 55);
         g.setFont(font1);
-        g.drawString("Karamja Fisher by Fernando", 28, 30);
+        g.drawString(gui.getCurrentMode() +" Fisher by Fernando", 28, 30);
         g.setFont(font2);
         g.drawString("Time Running: " + t.formatTime(), 29, 50);
         g.drawString("Fish catched:" + fishCatched, 29, 65);
@@ -157,92 +180,34 @@ public class FisherMain extends AbstractScript implements MessageListener {
     }
 
 
-    private States getCurrentHarpoonState(){
-        if(!traveler.hasFullInventory() && traveler.isInKaramjaIsland() && !traveler.isInsideKaramjaBoat()){
-            log("Trying to go fish...");
-            status = "Trying to go fish...";
-            return States.FISHING;
-        }
-        else if (!traveler.hasFullInventory() && traveler.isInKaramjaIsland() && traveler.isInsideKaramjaBoat()){
-            log("Trying to leave boat...");
-            status = "Trying to leave boat...";
-            return States.INSIDE_BOAT_KARAMJA;
-        }
-        else if (traveler.hasFullInventory() && traveler.isInKaramjaIsland() && !traveler.isInsideKaramjaBoat()){
-            log("Trying to pay fare...");
-            status = "Trying to pay fare...";
-            return States.OUTSIDE_BOAT_KARAMJA;
-        }
-        else if (traveler.hasFullInventory() && traveler.isInPortSarim() && traveler.isInsidePortSarimBoat()){
-            log("Trying to leave boat...");
-            status = "Trying to leave boat...";
-            return States.INSIDE_BOAT_PORT_SARIM;
-        }
-        else if (traveler.hasFullInventory() && traveler.isInPortSarim() && !traveler.isInsidePortSarimBoat() && moneyMaker.haveCoinsForNextTravel()){
-            log("Trying to bank fish...");
-            status = "Trying to bank fish...";
-            return States.OUTSIDE_BOAT_PORT_SARIM_BANK;
-        }
-        else if (traveler.hasFullInventory() && traveler.isInPortSarim() && !traveler.isInsidePortSarimBoat() && !moneyMaker.haveCoinsForNextTravel()){
-            log("No Coins... Selling fish...");
-            status = "Trying to sell fish...";
-            return States.OUTSIDE_BOAT_PORT_SARIM_SELL;
-        }
-        else if (!traveler.hasFullInventory() && traveler.isInPortSarim() && !traveler.isInsidePortSarimBoat()){
-            log("Trying to travel to Karamja...");
-            status = "Trying to travel to Karamja...";
-            return States.OUTSIDE_BOAT_PORT_SARIM_PAY_FARE;
-        }
-        else if (!traveler.hasFullInventory() && traveler.isInGeneralStore() && moneyMaker.haveCoinsForNextTravel() ){
-            log("In general store with new money... Going to Karamja.");
-            status = "New money... Going to Karamja.";
-            return States.IN_GENERAL_STORE_WITH_MONEY;
-        }
-        else if (!traveler.hasFullInventory() && traveler.isInGeneralStore() && !moneyMaker.haveCoinsForNextTravel() ){
-            log("In general store with new money... Going to Karamja.");
-            status = "New money... Going to Karamja.";
-            return States.IN_GENERAL_STORE_WITHOUT_MONEY;
-        }
-        return null;
-    }
-
-    public void processHarpoonState(States curentState){
-        randomCameraMovement();
-        switch(curentState) {
-            case FISHING:
-                fisher.activateFishing();
-                break;
-            case INSIDE_BOAT_KARAMJA:
-            case INSIDE_BOAT_PORT_SARIM:
-                traveler.crossPlank();
-                break;
-            case OUTSIDE_BOAT_KARAMJA:
-                traveler.walkToKaramjaPier();
-                traveler.payFareToPortSarim();
-                break;
-            case OUTSIDE_BOAT_PORT_SARIM_BANK:
-                traveler.depositLoot();
-                break;
-            case OUTSIDE_BOAT_PORT_SARIM_PAY_FARE:
-            case IN_GENERAL_STORE_WITH_MONEY:
-                traveler.walkToPortSarimPier();
-                traveler.payFareToKaramja();
-                break;
-            case OUTSIDE_BOAT_PORT_SARIM_SELL:
-                traveler.walkToGeneralStore();
-                break;
-            case IN_GENERAL_STORE_WITHOUT_MONEY:
-                moneyMaker.sellFish();
-                break;
-            default:
-                log("Program has bugged out. :(");
-        }
-
-    }
-
     public void randomCameraMovement() {
         if(Calculations.random(0, 9) > 4){
             getCamera().rotateTo(Calculations.random(2400), Calculations.random(getClient().getLowestPitch(), 384));
+        } else{
+            int r = Calculations.random(1, 100);
+            switch (r) {
+                case 1:
+                    getCamera().rotateToPitch(Calculations.random(333, 399));
+                    break;
+                case 2:
+                    getCamera().rotateToYaw(Calculations.random(1420, 1700));
+                    break;
+                case 3:
+                    getCamera().rotateToYaw(Calculations.random(455, 700));
+                    break;
+                default:
+            }
+        }
+    }
+
+    public void moveCursorOffScreen() {
+        int r = Calculations.random(1, 3);
+        switch (r) {
+            case 2:
+                if (getMouse().isMouseInScreen()) {
+                    getMouse().moveMouseOutsideScreen();
+                }
+                break;
         }
     }
 
