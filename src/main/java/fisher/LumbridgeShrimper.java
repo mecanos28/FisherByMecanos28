@@ -56,6 +56,7 @@ public class LumbridgeShrimper {
 
     public void processShrimpState(ShrimperStates curentState){
         m.randomCameraMovement();
+
         switch(curentState) {
             case FISHING:
                 m.fisher.activateLumbridgeShrimpFisher();

@@ -26,7 +26,7 @@ public class FisherGUI extends JFrame {
         modeComboBox = new JComboBox<>();
         modeLabel = new JLabel();
 
-        setTitle("Fisher by Fernando");
+        setTitle("Fisher by Mecanos28");
         Container contentPane = getContentPane();
         contentPane.setLayout(null);
 

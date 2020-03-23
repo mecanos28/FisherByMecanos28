@@ -16,7 +16,12 @@ import org.dreambot.api.wrappers.widgets.message.Message;
 
 import java.awt.*;
 
-@ScriptManifest(category = Category.FISHING, name = "Harpooner", author = "Fernando", version = 1.0)
+
+/*
+Author: mecanos28
+Run Gradle Scripts updateDreambot, buildScript and runDreambot
+ */
+@ScriptManifest(category = Category.FISHING, name = "Harpooner", author = "Mecanos28", version = 1.0)
 public class FisherMain extends AbstractScript implements MessageListener {
 
     public final Area fishingPierArea = new Area(2925, 3180, 2924, 3175, 0);
@@ -70,6 +75,7 @@ public class FisherMain extends AbstractScript implements MessageListener {
     }
 
     private void processMode(String mode){
+        processDialogue();
         switch (mode){
             case ("Lumbridge Shrimp"):
                 LumbridgeShrimper.ShrimperStates shrimpingState = lumbridgeShrimper.getCurrentShriperState();
@@ -141,7 +147,7 @@ public class FisherMain extends AbstractScript implements MessageListener {
         g.setStroke(stroke1);
         g.drawRoundRect(15, 15, 190, 120, 5, 55);
         g.setFont(font1);
-        g.drawString(gui.getCurrentMode() +" Fisher by Fernando", 28, 30);
+        g.drawString(gui.getCurrentMode() +" Fisher by Mecanos28", 28, 30);
         g.setFont(font2);
         g.drawString("Time Running: " + t.formatTime(), 29, 50);
         g.drawString("Fish catched:" + fishCatched, 29, 65);
@@ -153,7 +159,7 @@ public class FisherMain extends AbstractScript implements MessageListener {
 
     @Override
     public void onGameMessage(Message message) {
-        if(message.getMessage() != null && (message.getMessage().toLowerCase().contains("you catch a"))){
+        if(message.getMessage() != null && (message.getMessage().toLowerCase().contains("you catch a") || message.getMessage().toLowerCase().contains("you catch"))){
             fishCatched++;
         }
         if(message.getMessage() != null && (message.getMessage().toLowerCase().contains("advanced your fishing level"))){
@@ -212,6 +218,14 @@ public class FisherMain extends AbstractScript implements MessageListener {
                 break;
         }
     }
+
+    public void processDialogue() {
+        if (getDialogues().inDialogue()) {
+            getDialogues().clickContinue();
+        }
+    }
+
+
 
 
     private void testCode(){
