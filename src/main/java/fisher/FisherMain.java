@@ -49,6 +49,7 @@ public class FisherMain extends AbstractScript implements MessageListener {
     public int fishCatched;
     public int levelsGained;
     public String status;
+    public String mode;
 
     public boolean isShouldStart() {
         return shouldStart;
@@ -109,9 +110,10 @@ public class FisherMain extends AbstractScript implements MessageListener {
 
     @Override
     public int onLoop() {
-        if(shouldStart ){
+        mode = gui.getCurrentMode();
+        if(shouldStart){
             log("Executing new loop :D");
-            processMode(gui.getCurrentMode());
+            processMode(mode);
         }
         return 200;
     }

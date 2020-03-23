@@ -53,7 +53,6 @@ public class FisherGUI extends JFrame {
     }
 
     public String getCurrentMode() {
-        ctx.log("Selected Mode: " + modeComboBox.getSelectedItem().toString());
         return modeComboBox.getSelectedItem().toString();
     }
 

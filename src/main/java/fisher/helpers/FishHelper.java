@@ -51,7 +51,7 @@ public class FishHelper extends Helper {
     }
 
     private boolean inRimmingtonShrimpingArea() {
-        return m.rimmingtonShrimpArea.contains(m.getLocalPlayer()) || m.getLocalPlayer().distance(m.rimmingtonShrimpArea.getCenter()) < 3;
+        return m.rimmingtonShrimpArea.contains(m.getLocalPlayer()) || m.getLocalPlayer().distance(m.rimmingtonShrimpArea.getCenter()) < 4;
     }
 
     private boolean inKaramjaFishingArea() {
@@ -87,10 +87,9 @@ public class FishHelper extends Helper {
         m.log("Trying to get some Shrimp.");
         m.status = "Searching for shrimping spot...";
         NPC fishingSpot = m.getNpcs().closest(
-                n -> n != null && Arrays.toString(n.getActions()).contains("Net"));
+                n -> n != null && Arrays.toString(n.getActions()).contains("Net") || Arrays.toString(n.getActions()).contains("Small Net"));
 
-
-        if(fishingSpot != null && fishingSpot.interact("Net")){
+        if(fishingSpot != null && fishingSpot.interact(getCorrectShrimperAction())){
             m.log("Found fishing spot: " + fishingSpot.getName() + " Coordinates: "+ fishingSpot.getGridX() + " - " + fishingSpot.getGridY());
             m.status = "Fishing! :)";
             m.sleep(1000);
@@ -99,5 +98,9 @@ public class FishHelper extends Helper {
                 m.sleepUntil(() -> m.getLocalPlayer().getAnimation() == -1, 60000);
             }
         }
+    }
+
+    private String getCorrectShrimperAction() {
+        return m.mode.equals("Draynor Shrimp") ? "Small Net" : "Net";
     }
 }
