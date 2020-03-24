@@ -4,9 +4,9 @@ import org.dreambot.api.methods.container.impl.bank.BankLocation;
 
 public class DraynorShrimper {
 
-    FisherMain m;
+    BotMain m;
 
-    public DraynorShrimper(FisherMain m) {
+    public DraynorShrimper(BotMain m) {
         this.m = m;
     }
 

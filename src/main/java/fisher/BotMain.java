@@ -1,9 +1,6 @@
 package fisher;
 
-import fisher.helpers.CoinsHelper;
-import fisher.helpers.FishHelper;
-import fisher.helpers.FisherGUI;
-import fisher.helpers.TravelHelper;
+import fisher.helpers.*;
 import org.dreambot.api.methods.Calculations;
 import org.dreambot.api.methods.map.Area;
 import org.dreambot.api.methods.skills.Skill;
@@ -12,7 +9,11 @@ import org.dreambot.api.script.Category;
 import org.dreambot.api.script.ScriptManifest;
 import org.dreambot.api.script.listener.MessageListener;
 import org.dreambot.api.utilities.Timer;
+import org.dreambot.api.wrappers.interactive.Entity;
+import org.dreambot.api.wrappers.interactive.GameObject;
+import org.dreambot.api.wrappers.interactive.NPC;
 import org.dreambot.api.wrappers.widgets.message.Message;
+import org.dreambot.api.methods.tabs.Tab;
 
 import java.awt.*;
 
@@ -22,7 +23,7 @@ Author: mecanos28
 Run Gradle Scripts updateDreambot, buildScript and runDreambot
  */
 @ScriptManifest(category = Category.FISHING, name = "Harpooner", author = "Mecanos28", version = 1.0)
-public class FisherMain extends AbstractScript implements MessageListener {
+public class BotMain extends AbstractScript implements MessageListener {
 
     public final Area fishingPierArea = new Area(2925, 3180, 2924, 3175, 0);
     public final Area karamjaPierArea =  new Area(2949, 3147, 2959, 3146, 0);
@@ -33,10 +34,11 @@ public class FisherMain extends AbstractScript implements MessageListener {
 
     public final Area lumbridgeShrimpArea =  new Area(3243, 3154, 3240, 3150, 0);
     public final Area lumbridgeFirstFloorStairsArea =  new Area(3206, 3208, 3206, 3209, 0);
-    public final Area lumbridgeSecondFloorStairsArea =  new Area(3205, 3209, 3206, 3209, 1);
     public final Area lumbridgeThirdFloorStairsArea =  new Area(3205, 3209, 3206, 3209, 2);
 
     public final Area rimmingtonShrimpArea =  new Area(3087, 3227, 3087, 3230, 0);
+
+    public final Area lumbridgeCookingArea =  new Area(3207, 3212, 3211, 3216, 0);
 
 
 
@@ -45,6 +47,7 @@ public class FisherMain extends AbstractScript implements MessageListener {
     public TravelHelper traveler;
     public FishHelper fisher;
     public CoinsHelper moneyMaker;
+    public CookHelper cookHelper;
 
     private KaramjaHarpooner karamjaHarpooner;
     private LumbridgeShrimper lumbridgeShrimper;
@@ -76,6 +79,7 @@ public class FisherMain extends AbstractScript implements MessageListener {
 
     private void processMode(String mode){
         processDialogue();
+        intelligentSleep();
         switch (mode){
             case ("Lumbridge Shrimp"):
                 LumbridgeShrimper.ShrimperStates shrimpingState = lumbridgeShrimper.getCurrentShriperState();
@@ -108,6 +112,7 @@ public class FisherMain extends AbstractScript implements MessageListener {
         traveler = new TravelHelper(this);
         fisher = new FishHelper(this);
         moneyMaker = new CoinsHelper(this);
+        cookHelper =  new CookHelper(this, "Raw shrimp");
 
         karamjaHarpooner = new KaramjaHarpooner(this);
         lumbridgeShrimper = new LumbridgeShrimper(this);
@@ -189,33 +194,38 @@ public class FisherMain extends AbstractScript implements MessageListener {
 
 
     public void randomCameraMovement() {
-        if(Calculations.random(0, 9) > 4){
-            getCamera().rotateTo(Calculations.random(2400), Calculations.random(getClient().getLowestPitch(), 384));
-        } else{
-            int r = Calculations.random(1, 100);
-            switch (r) {
-                case 1:
-                    getCamera().rotateToPitch(Calculations.random(333, 399));
-                    break;
-                case 2:
-                    getCamera().rotateToYaw(Calculations.random(1420, 1700));
-                    break;
-                case 3:
-                    getCamera().rotateToYaw(Calculations.random(455, 700));
-                    break;
-                default:
-            }
+        int r = Calculations.random(1, 100);
+        switch (r) {
+            case 1:
+                getCamera().rotateToPitch(Calculations.random(333, 399));
+                break;
+            case 2:
+                getCamera().rotateToYaw(Calculations.random(1420, 1700));
+                break;
+            case 3:
+                getCamera().rotateToYaw(Calculations.random(455, 700));
+                break;
+            default:
         }
     }
 
-    public void moveCursorOffScreen() {
-        int r = Calculations.random(1, 3);
+    public void moveCursor() {
+        int r = Calculations.random(1, 5);
         switch (r) {
             case 2:
-                if (getMouse().isMouseInScreen()) {
-                    getMouse().moveMouseOutsideScreen();
-                }
+            case 3:
+                moveCursorOutside();
                 break;
+            case 4:
+            case 5:
+                getMouse().move(getClient().getCanvasImage().getRaster().getBounds());
+                break;
+        }
+    }
+
+    private void moveCursorOutside() {
+        if (getMouse().isMouseInScreen()) {
+            getMouse().moveMouseOutsideScreen();
         }
     }
 
@@ -224,6 +234,51 @@ public class FisherMain extends AbstractScript implements MessageListener {
             getDialogues().clickContinue();
         }
     }
+
+    private void intelligentSleep() {
+        switch (Calculations.random(0, 50)) {
+            case 25:
+                //log("longer wait....");
+                moveCursorOutside();
+
+                status = "sleeping...";
+                sleep(Calculations.random(110000, 245000));
+                break;
+        }
+    }
+
+
+    public void findWithCamera(NPC npc) {
+        if (!npc.isOnScreen()) {
+            status = "Rotating camera...";
+            log("object is not on screen, rotating camera...");
+            sleep(Calculations.random(0, 1500));
+            getCamera().rotateToTile(npc.getTile().getRandomizedTile());
+            sleep(Calculations.random(0, 1500));
+        }
+    }
+
+    public void findWithCamera(GameObject object) {
+        if (!object.isOnScreen()) {
+            status = "Rotating camera...";
+            log("object is not on screen, rotating camera...");
+            sleep(Calculations.random(0, 1500));
+            getCamera().rotateToTile(object.getTile().getRandomizedTile());
+            sleep(Calculations.random(0, 1500));
+        }
+    }
+
+    public void findWithCamera(Entity entity) {
+        if (!entity.isOnScreen()) {
+            status = "Rotating camera...";
+            log("object is not on screen, rotating camera...");
+            sleep(Calculations.random(0, 1500));
+            getCamera().rotateToTile(entity.getTile().getRandomizedTile());
+            sleep(Calculations.random(0, 1500));
+        }
+    }
+
+
 
 
 

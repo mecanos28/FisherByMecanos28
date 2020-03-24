@@ -1,6 +1,6 @@
 package fisher.helpers;
 
-import fisher.FisherMain;
+import fisher.BotMain;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -10,8 +10,8 @@ import javax.swing.*;
  * @author Jeff Smith
  */
 public class FisherGUI extends JFrame {
-    private FisherMain ctx;
-    public FisherGUI(FisherMain main){
+    private BotMain ctx;
+    public FisherGUI(BotMain main){
         this.ctx = main;
         initComponents();
     }

@@ -1,6 +1,6 @@
 package fisher.helpers;
 
-import fisher.FisherMain;
+import fisher.BotMain;
 import org.dreambot.api.methods.Calculations;
 import org.dreambot.api.wrappers.interactive.NPC;
 import org.dreambot.api.wrappers.widgets.WidgetChild;
@@ -9,7 +9,7 @@ import static org.dreambot.api.methods.MethodProvider.log;
 
 public class CoinsHelper extends Helper {
 
-    public CoinsHelper(FisherMain m) {
+    public CoinsHelper(BotMain m) {
         super(m);
     }
 
@@ -39,6 +39,7 @@ public class CoinsHelper extends Helper {
 
     private void openTradeWindow() {
         NPC trader = m.traveler.getGuyByActionName("Trade");
+        m.findWithCamera(trader);
         trader.interact("Trade");
         log("Trading...");
     }

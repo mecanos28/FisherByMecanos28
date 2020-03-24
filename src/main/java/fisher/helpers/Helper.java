@@ -1,11 +1,11 @@
 package fisher.helpers;
 
-import fisher.FisherMain;
+import fisher.BotMain;
 
 public abstract class Helper {
-    protected final FisherMain m;
+    protected final BotMain m;
 
-    public Helper(FisherMain m) {
+    public Helper(BotMain m) {
         this.m = m;
     }
 }

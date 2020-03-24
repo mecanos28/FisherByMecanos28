@@ -2,9 +2,9 @@ package fisher;
 
 public class KaramjaHarpooner {
     
-    FisherMain m;
+    BotMain m;
     
-    public KaramjaHarpooner(FisherMain m) {
+    public KaramjaHarpooner(BotMain m) {
         this.m = m;
     }
 
@@ -85,7 +85,7 @@ public class KaramjaHarpooner {
                 m.traveler.payFareToPortSarim();
                 break;
             case OUTSIDE_BOAT_PORT_SARIM_BANK:
-                m.traveler.depositLoot();
+                m.traveler.depositKaramjaLoot();
                 break;
             case OUTSIDE_BOAT_PORT_SARIM_PAY_FARE:
             case IN_GENERAL_STORE_WITH_MONEY:
