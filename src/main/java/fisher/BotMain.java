@@ -4,6 +4,7 @@ import fisher.helpers.*;
 import org.dreambot.api.methods.Calculations;
 import org.dreambot.api.methods.map.Area;
 import org.dreambot.api.methods.skills.Skill;
+import org.dreambot.api.methods.tabs.Tab;
 import org.dreambot.api.script.AbstractScript;
 import org.dreambot.api.script.Category;
 import org.dreambot.api.script.ScriptManifest;
@@ -13,7 +14,6 @@ import org.dreambot.api.wrappers.interactive.Entity;
 import org.dreambot.api.wrappers.interactive.GameObject;
 import org.dreambot.api.wrappers.interactive.NPC;
 import org.dreambot.api.wrappers.widgets.message.Message;
-import org.dreambot.api.methods.tabs.Tab;
 
 import java.awt.*;
 
@@ -52,6 +52,7 @@ public class BotMain extends AbstractScript implements MessageListener {
     private KaramjaHarpooner karamjaHarpooner;
     private LumbridgeShrimper lumbridgeShrimper;
     private DraynorShrimper draynorShrimper;
+    private LumbridgeCooker lumbridgeCooker;
 
 
     public int fishCatched;
@@ -79,7 +80,7 @@ public class BotMain extends AbstractScript implements MessageListener {
 
     private void processMode(String mode){
         processDialogue();
-        intelligentSleep();
+        antiban();
         switch (mode){
             case ("Lumbridge Shrimp"):
                 LumbridgeShrimper.ShrimperStates shrimpingState = lumbridgeShrimper.getCurrentShriperState();
@@ -93,6 +94,10 @@ public class BotMain extends AbstractScript implements MessageListener {
                 DraynorShrimper.RimmingtonShrimperStates draynorShrimperState = draynorShrimper.getCurrentShriperState();
                 draynorShrimper.processShrimpState(draynorShrimperState);
                 break;
+            case("Lumbridge Cooker"):
+                LumbridgeCooker.CookerStates lumbridgeCookerState = lumbridgeCooker.getCurrentLumbridgeCookerState();
+                lumbridgeCooker.processCurrentLumbridgeCookerState(lumbridgeCookerState);
+
             default:
         }
     }
@@ -117,6 +122,7 @@ public class BotMain extends AbstractScript implements MessageListener {
         karamjaHarpooner = new KaramjaHarpooner(this);
         lumbridgeShrimper = new LumbridgeShrimper(this);
         draynorShrimper = new DraynorShrimper(this);
+        lumbridgeCooker = new LumbridgeCooker(this);
     }
 
     @Override
@@ -235,15 +241,27 @@ public class BotMain extends AbstractScript implements MessageListener {
         }
     }
 
-    private void intelligentSleep() {
-        switch (Calculations.random(0, 50)) {
+    private void antiban() {
+        switch (Calculations.random(0, 25)) {
             case 25:
-                //log("longer wait....");
                 moveCursorOutside();
-
                 status = "sleeping...";
                 sleep(Calculations.random(110000, 245000));
                 break;
+            case 24:
+                moveCursorOutside();
+                status = "sleeping...";
+                sleep(Calculations.random(110000, 245000));
+                break;
+            case 23:
+                getTabs().open(Tab.SKILLS);
+                sleep(Calculations.random(5000,14000));
+                getTabs().open(Tab.INVENTORY);
+            case 22:
+                getTabs().open(Tab.EQUIPMENT);
+                sleep(Calculations.random(5000, 14000));
+                getTabs().open(Tab.INVENTORY);
+
         }
     }
 

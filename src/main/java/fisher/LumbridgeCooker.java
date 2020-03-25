@@ -70,7 +70,7 @@ public class LumbridgeCooker {
                 break;
             case BANKING:
                 m.traveler.walkToArea(BankLocation.LUMBRIDGE.getArea(1));
-                m.traveler.bankShrimp();
+                m.traveler.depositAllAndWithdrawAll(m.cookHelper.getCookItemName());
                 break;
             case JUST_BANKED:
                 m.traveler.walkToArea(m.lumbridgeThirdFloorStairsArea);

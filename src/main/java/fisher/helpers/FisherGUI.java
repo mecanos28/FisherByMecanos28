@@ -38,7 +38,8 @@ public class FisherGUI extends JFrame {
         modeComboBox.setModel(new DefaultComboBoxModel<>(new String[]{
                 "Lumbridge Shrimp",
                 "Karamja Harpoon",
-                "Draynor Shrimp"
+                "Draynor Shrimp",
+                "Lumbridge Cooker"
         }));
         contentPane.add(modeComboBox);
         modeComboBox.setBounds(15, 10, 185, 35);

@@ -43,7 +43,7 @@ public class TravelHelper extends Helper {
     }
 
     public void walkToArea(Area area) {
-        while (!area.contains(m.getLocalPlayer()) || m.getLocalPlayer().distance(area.getCenter()) < 4) {
+        while (!area.contains(m.getLocalPlayer()) || !(m.getLocalPlayer().distance(area.getCenter()) < 5)) {
             m.status = "Walking...";
             m.getWalking().walk(area.getRandomTile());
             sleepUntil(() -> !m.getLocalPlayer().isMoving(), 5200);
@@ -96,7 +96,7 @@ public class TravelHelper extends Helper {
     }
 
     public boolean hasItemInInventory(String item) {
-        return m.getInventory().contains(item);
+        return m.getInventory().contains(i -> i != null && i.getName().contains(item));
     }
 
     public boolean isInKaramjaIsland() {
@@ -192,6 +192,26 @@ public class TravelHelper extends Helper {
         if(Calculations.random(1, 10) > 4) m.getBank().close();
         m.sleep(Calculations.random(1000, 4000));
     }
+
+    public void depositAllAndWithdrawAll(String item){
+        log("Banking.");
+        m.randomCameraMovement();
+
+        while(!m.getBank().open()){
+            m.status = "Opening Bank";
+            m.randomCameraMovement();
+            m.sleep(Calculations.random(1000, 2000));
+        }
+        if (m.getBank().isOpen()) {
+            m.status = "Depositing all inventory...";
+            if(!m.getInventory().isEmpty()) sleepUntil(() -> m.getBank().depositAllItems(), Calculations.random(1000, 3000));
+            log("Withdrawing all " + item);
+            sleepUntil(() -> m.getBank().withdrawAll(i -> i != null && i.getName().contains(item)), Calculations.random(1000, 3000));
+        }
+        if(Calculations.random(1, 10) > 4) m.getBank().close();
+        m.sleep(Calculations.random(1000, 4000));
+    }
+
 
     public void bankShrimp(){
         log("Banking.");

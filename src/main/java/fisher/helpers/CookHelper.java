@@ -45,9 +45,12 @@ public class CookHelper extends Helper {
         m.status = "Trying to click cooking action";
         WidgetChild cook = m.getWidgets().getWidgetChild(270, 14);
         if(cook != null && cook.interact()) {
-            m.status = "Cooking!";
-            m.sleep(Calculations.random(1000, 2400));
-            m.sleepWhile(() -> m.getLocalPlayer().getAnimation() != -1, Calculations.random(1000, 1400));
+            m.status = "Cooking!";;
+        }
+        if (m.getLocalPlayer().getAnimation() == 696) {
+            m.sleepUntil(() -> m.getLocalPlayer().getAnimation() == -1, 60000);
+        }
+        if(!m.traveler.hasItemInInventory(m.cookHelper.getCookItemName())){
             m.sleep(Calculations.random(1500, 10000));
         }
     }
@@ -69,6 +72,7 @@ public class CookHelper extends Helper {
             m.sleep(Calculations.random(1000, 2000));
             range = m.getGameObjects().closest(g -> g != null && (g.getName().contains("range")  || g.getName().equals("Clay oven") || g.getName().equals("Fire")));
         }
+        m.status = "Found " + range.getName();
         return range;
     }
 
@@ -76,8 +80,8 @@ public class CookHelper extends Helper {
         return m.getWidgets().getWidgets(w -> w != null && w.getText().contains("How many would you like"));
     }
 
-    private boolean clickEntity(Entity entity) {
-        return m.getInventory().get(cookItemName).useOn(entity);
+    private void clickEntity(Entity entity) {
+        entity.interact();
     }
 
     private boolean inLumbridgeCookingArea() {
