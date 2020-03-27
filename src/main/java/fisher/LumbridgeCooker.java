@@ -1,5 +1,6 @@
 package fisher;
 
+import org.dreambot.api.methods.MethodProvider;
 import org.dreambot.api.methods.container.impl.bank.BankLocation;
 
 public class LumbridgeCooker {
@@ -22,32 +23,32 @@ public class LumbridgeCooker {
 
     public CookerStates getCurrentLumbridgeCookerState(){
         if(m.traveler.hasItemInInventory(m.cookHelper.getCookItemName()) && m.traveler.isInGroundLevel()){
-            m.log("Trying to cook...");
+            MethodProvider.log("Trying to cook...");
             m.status = "Trying to cook...";
             return CookerStates.COOKING;
         }
         else if (!m.traveler.hasItemInInventory(m.cookHelper.getCookItemName()) && m.traveler.isInGroundLevel()){
-            m.log("Going to go to bank...");
+            MethodProvider.log("Going to go to bank...");
             m.status = "Going to go to  bank..";
             return CookerStates.GOING_TO_BANK;
         }
         else if (!m.traveler.hasItemInInventory(m.cookHelper.getCookItemName()) && m.traveler.isInSecondLevel()){
-            m.log("Going upstairs...");
+            MethodProvider.log("Going upstairs...");
             m.status = "Going upstairs..";
             return CookerStates.IN_SECOND_FLOOR_GOING_UP;
         }
         else if (!m.traveler.hasItemInInventory(m.cookHelper.getCookItemName()) && m.traveler.isInThirdLevel()){
-            m.log("Banking...");
+            MethodProvider.log("Banking...");
             m.status = "Banking...";
             return CookerStates.BANKING;
         }
         else if (m.traveler.hasItemInInventory(m.cookHelper.getCookItemName()) && m.traveler.isInThirdLevel()){
-            m.log("Just banked and got new raw food..");
+            MethodProvider.log("Just banked and got new raw food..");
             m.status = "Just banked... going to second floor.";
             return CookerStates.JUST_BANKED;
         }
         else if (m.traveler.hasItemInInventory(m.cookHelper.getCookItemName()) && m.traveler.isInSecondLevel()){
-            m.log("Going downstairs to cook...");
+            MethodProvider.log("Going downstairs to cook...");
             m.status = "Going downstairs to cook...";
             return CookerStates.IN_SECOND_FLOOR_GOING_DOWN;
         }
@@ -80,7 +81,7 @@ public class LumbridgeCooker {
                 m.traveler.interactWithStaircase("Climb-down");
                 break;
             default:
-                m.log("Program has bugged out. :(");
+                MethodProvider.log("Program has bugged out. :(");
         }
 
     }

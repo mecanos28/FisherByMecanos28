@@ -2,6 +2,7 @@ package fisher.helpers;
 
 import fisher.BotMain;
 import org.dreambot.api.methods.Calculations;
+import org.dreambot.api.methods.MethodProvider;
 import org.dreambot.api.wrappers.interactive.NPC;
 
 import java.util.Arrays;
@@ -19,7 +20,7 @@ public class FishHelper extends Helper {
         }else{
             m.status = "Walking to get some fish...";
             if(m.getWalking().walk(m.fishingPierArea.getRandomTile())){
-                m.sleepUntil(() -> inKaramjaFishingArea(),Calculations.random(3000, 5500));
+                MethodProvider.sleepUntil(() -> inKaramjaFishingArea(),Calculations.random(3000, 5500));
             }
         }
     }
@@ -30,7 +31,7 @@ public class FishHelper extends Helper {
         }else{
             m.status = "Walking to get some fish...";
             if(m.getWalking().walk(m.lumbridgeShrimpArea.getRandomTile())){
-                m.sleepUntil(() -> inLumbridgeShrimpingArea(),Calculations.random(3000, 5500));
+                MethodProvider.sleepUntil(() -> inLumbridgeShrimpingArea(),Calculations.random(3000, 5500));
             }
         }
     }
@@ -41,7 +42,7 @@ public class FishHelper extends Helper {
         }else{
             m.status = "Walking to get some fish...";
             if(m.getWalking().walk(m.rimmingtonShrimpArea.getRandomTile())){
-                m.sleepUntil(() -> inRimmingtonShrimpingArea(),Calculations.random(3000, 5500));
+                MethodProvider.sleepUntil(() -> inRimmingtonShrimpingArea(),Calculations.random(3000, 5500));
             }
         }
     }
@@ -60,7 +61,7 @@ public class FishHelper extends Helper {
 
     public void dropTunas() {
         if(m.getInventory().count("Raw tuna") > 4){
-            m.log("dropping tunas...");
+            MethodProvider.log("dropping tunas...");
             m.status = "Dropping Tunas! :)";
             m.getInventory().dropAll((item) -> item != null && ("Raw tuna").equals(item.getName()) );
         }
@@ -69,7 +70,7 @@ public class FishHelper extends Helper {
 
     public void getMeSomeSwordfish(){
         m.randomCameraMovement();
-        m.log("Trying to get some fish.");
+        MethodProvider.log("Trying to get some fish.");
         m.status = "Searching for harpooning spot...";
         NPC fishingSpot = m.getNpcs().closest(
                 n -> n != null && Arrays.toString(n.getActions()).contains("Harpoon") && Arrays.toString(n.getActions()).contains("Cage"));
@@ -77,15 +78,15 @@ public class FishHelper extends Helper {
         m.findWithCamera(fishingSpot);
 
         if(fishingSpot != null && fishingSpot.interact("Harpoon")){
-            m.log("Found fishing spot: " + fishingSpot.getName() + " Coordinates: "+ fishingSpot.getGridX() + " - " + fishingSpot.getGridY());
+            MethodProvider.log("Found fishing spot: " + fishingSpot.getName() + " Coordinates: "+ fishingSpot.getGridX() + " - " + fishingSpot.getGridY());
             m.status = "Fishing! :)";
-            m.sleepUntil(() -> m.getLocalPlayer().getAnimation() == -1, Calculations.random(20000, 25000));
+            MethodProvider.sleepUntil(() -> m.getLocalPlayer().getAnimation() == -1, Calculations.random(20000, 25000));
         }
     }
 
     public void getMeSomeShrimp(){
         m.randomCameraMovement();
-        m.log("Trying to get some Shrimp.");
+        MethodProvider.log("Trying to get some Shrimp.");
         m.status = "Searching for shrimping spot...";
         NPC fishingSpot = m.getNpcs().closest(
                 n -> n != null && Arrays.toString(n.getActions()).contains("Net") || Arrays.toString(n.getActions()).contains("Small Net"));
@@ -93,13 +94,13 @@ public class FishHelper extends Helper {
         m.findWithCamera(fishingSpot);
 
         if(fishingSpot != null && fishingSpot.interact(getCorrectShrimperAction())){
-            m.log("Found fishing spot: " + fishingSpot.getName() + " Coordinates: "+ fishingSpot.getGridX() + " - " + fishingSpot.getGridY());
+            MethodProvider.log("Found fishing spot: " + fishingSpot.getName() + " Coordinates: "+ fishingSpot.getGridX() + " - " + fishingSpot.getGridY());
             m.status = "Fishing! :)";
-            m.sleep(1000);
+            MethodProvider.sleep(1000);
             m.moveCursor();
             if (m.getLocalPlayer().getAnimation() == 621) {
-                m.sleepUntil(() -> m.getLocalPlayer().getAnimation() == -1, 60000);
-                m.sleep(Calculations.random(1300,4900));
+                MethodProvider.sleepUntil(() -> m.getLocalPlayer().getAnimation() == -1, 60000);
+                MethodProvider.sleep(Calculations.random(1300,4900));
             }
         }
     }

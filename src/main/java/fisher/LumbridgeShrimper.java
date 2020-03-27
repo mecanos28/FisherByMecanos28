@@ -1,5 +1,6 @@
 package fisher;
 
+import org.dreambot.api.methods.MethodProvider;
 import org.dreambot.api.methods.container.impl.bank.BankLocation;
 
 public class LumbridgeShrimper {
@@ -22,32 +23,32 @@ public class LumbridgeShrimper {
 
     public ShrimperStates getCurrentShriperState(){
         if(!m.traveler.hasFullInventory() && m.traveler.isInGroundLevel()){
-            m.log("Trying to go fish...");
+            MethodProvider.log("Trying to go fish...");
             m.status = "Trying to go fish...";
             return ShrimperStates.FISHING;
         }
         else if (m.traveler.hasFullInventory() && m.traveler.isInGroundLevel()){
-            m.log("Going to castle...");
+            MethodProvider.log("Going to castle...");
             m.status = "Going to castle..";
             return ShrimperStates.GOING_TO_BANK_OUTSIDE_CASTLE;
         }
         else if (m.traveler.hasFullInventory() && m.traveler.isInSecondLevel()){
-            m.log("Going upstairs...");
+            MethodProvider.log("Going upstairs...");
             m.status = "Going upstairs..";
             return ShrimperStates.IN_SECOND_FLOOR_GOING_UP;
         }
         else if (m.traveler.hasFullInventory() && m.traveler.isInThirdLevel()){
-            m.log("Banking...");
+            MethodProvider.log("Banking...");
             m.status = "Banking...";
             return ShrimperStates.BANKING;
         }
         else if (!m.traveler.hasFullInventory() && m.traveler.isInThirdLevel()){
-            m.log("Just banked..");
+            MethodProvider.log("Just banked..");
             m.status = "Just banked... going to second floor.";
             return ShrimperStates.JUST_BANKED;
         }
         else if (!m.traveler.hasFullInventory() && m.traveler.isInSecondLevel()){
-            m.log("Going downstairs...");
+            MethodProvider.log("Going downstairs...");
             m.status = "Going downstairs...";
             return ShrimperStates.IN_SECOND_FLOOR_GOING_DOWN;
         }
@@ -80,7 +81,7 @@ public class LumbridgeShrimper {
                 m.traveler.interactWithStaircase("Climb-down");
                 break;
             default:
-                m.log("Program has bugged out. :(");
+                MethodProvider.log("Program has bugged out. :(");
         }
 
     }

@@ -4,6 +4,7 @@ import fisher.helpers.*;
 import org.dreambot.api.methods.Calculations;
 import org.dreambot.api.methods.map.Area;
 import org.dreambot.api.methods.skills.Skill;
+import org.dreambot.api.methods.skills.Skills;
 import org.dreambot.api.methods.tabs.Tab;
 import org.dreambot.api.script.AbstractScript;
 import org.dreambot.api.script.Category;
@@ -13,9 +14,11 @@ import org.dreambot.api.utilities.Timer;
 import org.dreambot.api.wrappers.interactive.Entity;
 import org.dreambot.api.wrappers.interactive.GameObject;
 import org.dreambot.api.wrappers.interactive.NPC;
+import org.dreambot.api.wrappers.items.GroundItem;
 import org.dreambot.api.wrappers.widgets.message.Message;
 
 import java.awt.*;
+import java.util.Optional;
 
 
 /*
@@ -48,17 +51,20 @@ public class BotMain extends AbstractScript implements MessageListener {
     public FishHelper fisher;
     public CoinsHelper moneyMaker;
     public CookHelper cookHelper;
+    public FighterHelper fighterHelper;
 
     private KaramjaHarpooner karamjaHarpooner;
     private LumbridgeShrimper lumbridgeShrimper;
     private DraynorShrimper draynorShrimper;
     private LumbridgeCooker lumbridgeCooker;
+    private LumbridgeChickenKiller lumbridgeChickenKiller;
 
 
     public int fishCatched;
     public int levelsGained;
     public String status;
     public String mode;
+    public Skill currentSkill;
 
     public boolean isShouldStart() {
         return shouldStart;
@@ -83,20 +89,30 @@ public class BotMain extends AbstractScript implements MessageListener {
         antiban();
         switch (mode){
             case ("Lumbridge Shrimp"):
+                if(currentSkill == null) {currentSkill = Skill.FISHING;}
                 LumbridgeShrimper.ShrimperStates shrimpingState = lumbridgeShrimper.getCurrentShriperState();
                 lumbridgeShrimper.processShrimpState(shrimpingState);
                 break;
             case ("Karamja Harpoon"):
+                if(currentSkill == null) {currentSkill = Skill.FISHING;}
                 KaramjaHarpooner.HarpooningStates harpooningState = karamjaHarpooner.getCurrentHarpoonState();
                 karamjaHarpooner.processHarpoonState(harpooningState);
                 break;
             case ("Draynor Shrimp"):
+                if(currentSkill == null) {currentSkill = Skill.FISHING;}
                 DraynorShrimper.RimmingtonShrimperStates draynorShrimperState = draynorShrimper.getCurrentShriperState();
                 draynorShrimper.processShrimpState(draynorShrimperState);
                 break;
             case("Lumbridge Cooker"):
+                if(currentSkill == null) {currentSkill = Skill.COOKING;}
                 LumbridgeCooker.CookerStates lumbridgeCookerState = lumbridgeCooker.getCurrentLumbridgeCookerState();
-                lumbridgeCooker.processCurrentLumbridgeCookerState(lumbridgeCookerState);
+                lumbridgeCooker.processCurrentLumbridgeCookerState(lumbridgeCookerState); //
+                break;
+            case ("Lumbridge Chicken Fighter"):
+                if(currentSkill == null) {currentSkill = Skill.RANGED;}
+                LumbridgeChickenKiller.ChickenKillerStates chickenKillerState = lumbridgeChickenKiller.getCurrentFighterState();
+                lumbridgeChickenKiller.processFighterState(chickenKillerState);
+                break;
 
             default:
         }
@@ -117,12 +133,15 @@ public class BotMain extends AbstractScript implements MessageListener {
         traveler = new TravelHelper(this);
         fisher = new FishHelper(this);
         moneyMaker = new CoinsHelper(this);
-        cookHelper =  new CookHelper(this, "Raw shrimp");
+        cookHelper =  new CookHelper(this, "Raw anchovies");
+        fighterHelper =  new FighterHelper(this);
 
         karamjaHarpooner = new KaramjaHarpooner(this);
         lumbridgeShrimper = new LumbridgeShrimper(this);
         draynorShrimper = new DraynorShrimper(this);
         lumbridgeCooker = new LumbridgeCooker(this);
+        lumbridgeChickenKiller = new LumbridgeChickenKiller(this);
+
     }
 
     @Override
@@ -158,12 +177,14 @@ public class BotMain extends AbstractScript implements MessageListener {
         g.setStroke(stroke1);
         g.drawRoundRect(15, 15, 190, 120, 5, 55);
         g.setFont(font1);
-        g.drawString(gui.getCurrentMode() +" Fisher by Mecanos28", 28, 30);
+        g.drawString(gui.getCurrentMode() +" Bot by Mecanos28", 28, 30);
         g.setFont(font2);
         g.drawString("Time Running: " + t.formatTime(), 29, 50);
-        g.drawString("Fish catched:" + fishCatched, 29, 65);
-        g.drawString("Levels gained: " + levelsGained + " | Current level: " + getSkillTracker().getStartLevel(Skill.FISHING), 29, 80);
-        g.drawString("Fishing XP/H: " + getSkillTracker().getGainedExperiencePerHour(Skill.FISHING), 29, 95);
+        if(currentSkill == Skill.FISHING){
+            g.drawString("Fish catched:" + fishCatched, 29, 65);
+        }
+        g.drawString("Levels gained: " + levelsGained + " | Current level: " + getSkills().getRealLevel(currentSkill), 29, 80);
+        g.drawString("Fishing XP/H: " + getSkillTracker().getGainedExperiencePerHour(currentSkill), 29, 95);
         g.drawString("Status: " + status, 29, 110);
 
     }
@@ -173,7 +194,7 @@ public class BotMain extends AbstractScript implements MessageListener {
         if(message.getMessage() != null && (message.getMessage().toLowerCase().contains("you catch a") || message.getMessage().toLowerCase().contains("you catch"))){
             fishCatched++;
         }
-        if(message.getMessage() != null && (message.getMessage().toLowerCase().contains("advanced your fishing level"))){
+        if(message.getMessage() != null && (message.getMessage().toLowerCase().contains("advanced your"))){
             levelsGained++;
         }
     }
@@ -200,11 +221,10 @@ public class BotMain extends AbstractScript implements MessageListener {
 
 
     public void randomCameraMovement() {
-        int r = Calculations.random(1, 100);
+        int r = Calculations.random(1, 40);
         switch (r) {
             case 1:
                 getCamera().rotateToPitch(Calculations.random(333, 399));
-                break;
             case 2:
                 getCamera().rotateToYaw(Calculations.random(1420, 1700));
                 break;
@@ -216,15 +236,19 @@ public class BotMain extends AbstractScript implements MessageListener {
     }
 
     public void moveCursor() {
-        int r = Calculations.random(1, 5);
+        int r = Calculations.random(1, 10);
         switch (r) {
-            case 2:
             case 3:
                 moveCursorOutside();
+                sleep(2000, 5000);
                 break;
+            case 1:
+            case 2:
             case 4:
             case 5:
                 getMouse().move(getClient().getCanvasImage().getRaster().getBounds());
+                break;
+            default:
                 break;
         }
     }
@@ -242,19 +266,17 @@ public class BotMain extends AbstractScript implements MessageListener {
     }
 
     private void antiban() {
-        switch (Calculations.random(0, 25)) {
+        randomCameraMovement();
+        moveCursor();
+        switch (Calculations.random(0, 60)) {
             case 25:
                 moveCursorOutside();
                 status = "sleeping...";
-                sleep(Calculations.random(110000, 245000));
-                break;
-            case 24:
-                moveCursorOutside();
-                status = "sleeping...";
-                sleep(Calculations.random(110000, 245000));
+                sleep(Calculations.random(60000, 180000));
                 break;
             case 23:
                 getTabs().open(Tab.SKILLS);
+                getSkills().hoverSkill(currentSkill);
                 sleep(Calculations.random(5000,14000));
                 getTabs().open(Tab.INVENTORY);
             case 22:
@@ -294,6 +316,43 @@ public class BotMain extends AbstractScript implements MessageListener {
             getCamera().rotateToTile(entity.getTile().getRandomizedTile());
             sleep(Calculations.random(0, 1500));
         }
+    }
+
+    public NPC getCloseByNPC(String name) {
+        NPC npc;
+        sleep(Calculations.random(1000, 2000));
+        npc = getNpcs().closest(g -> g != null && (g.getName().toLowerCase().contains(name)));
+        status = "Found " + npc.getName();
+        return npc;
+    }
+
+    public GroundItem getCloseByGroundItem(String name) {
+        GroundItem groundItem;
+        groundItem = getGroundItems().closest(g -> (canPickup(g) && g.getName().toLowerCase().contains(name)));
+        if (groundItem != null){
+            status = "Found " + groundItem.getName();
+        }else{
+            status = " COULD NOT FIND " + name;
+        }
+        return groundItem;
+    }
+
+    public void lootNearbyItem(GroundItem groundItem){
+        if (groundItem != null) {
+            if (!getLocalPlayer().isAnimating()) {
+                if (canPickup(groundItem)) {
+                    if(Calculations.random(0, 100) >95) getCamera().rotateToEntity(groundItem);
+                    status = "Looting: "+ groundItem;
+                    if (groundItem.interact("Take")) {
+                        sleepUntil(() -> !groundItem.exists(), 3000);
+                    }
+                }
+            }
+        }
+    }
+
+    private boolean canPickup(GroundItem g) {
+        return getMap().canReach(g) && g.distance(getLocalPlayer()) < 4;
     }
 
 

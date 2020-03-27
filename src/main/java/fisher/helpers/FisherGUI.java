@@ -39,7 +39,8 @@ public class FisherGUI extends JFrame {
                 "Lumbridge Shrimp",
                 "Karamja Harpoon",
                 "Draynor Shrimp",
-                "Lumbridge Cooker"
+                "Lumbridge Cooker",
+                "Lumbridge Chicken Fighter"
         }));
         contentPane.add(modeComboBox);
         modeComboBox.setBounds(15, 10, 185, 35);

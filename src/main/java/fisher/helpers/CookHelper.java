@@ -2,6 +2,7 @@ package fisher.helpers;
 
 import fisher.BotMain;
 import org.dreambot.api.methods.Calculations;
+import org.dreambot.api.methods.MethodProvider;
 import org.dreambot.api.methods.tabs.Tab;
 import org.dreambot.api.wrappers.interactive.Entity;
 import org.dreambot.api.wrappers.widgets.WidgetChild;
@@ -30,7 +31,7 @@ public class CookHelper extends Helper {
         }else{
             m.status = "Walking to kitchen...";
             if(m.getWalking().walk(m.lumbridgeCookingArea.getRandomTile())){
-                m.sleepUntil(() -> inLumbridgeCookingArea(),Calculations.random(3000, 5500));
+                MethodProvider.sleepUntil(() -> inLumbridgeCookingArea(),Calculations.random(3000, 5500));
             }
         }
     }
@@ -45,13 +46,14 @@ public class CookHelper extends Helper {
         m.status = "Trying to click cooking action";
         WidgetChild cook = m.getWidgets().getWidgetChild(270, 14);
         if(cook != null && cook.interact()) {
-            m.status = "Cooking!";;
-        }
-        if (m.getLocalPlayer().getAnimation() == 696) {
-            m.sleepUntil(() -> m.getLocalPlayer().getAnimation() == -1, 60000);
+            m.status = "Cooking!";
+            if (m.getLocalPlayer().isAnimating() || !m.getLocalPlayer().isStandingStill()) {
+                MethodProvider.sleep(Calculations.random(1000, 3000));
+                MethodProvider.sleepWhile(() -> m.getLocalPlayer().isAnimating() || m.getInventory().contains(cookItemName), Calculations.random(60000));
+            }
         }
         if(!m.traveler.hasItemInInventory(m.cookHelper.getCookItemName())){
-            m.sleep(Calculations.random(1500, 10000));
+            MethodProvider.sleep(Calculations.random(1500, 10000));
         }
     }
 
@@ -61,7 +63,7 @@ public class CookHelper extends Helper {
         List<WidgetChild> children = getFoodChildren();
         while (children.isEmpty()){
             clickEntity(range);
-            m.sleep(Calculations.random(1000, 2400));
+            MethodProvider.sleep(Calculations.random(1000, 2400));
             children = getFoodChildren();
         }
     }
@@ -69,7 +71,7 @@ public class CookHelper extends Helper {
     private Entity getCloseByCookingSpot() {
         Entity range = m.getGameObjects().closest(g -> g != null && (g.getName().contains("range") || g.getName().equals("Clay oven") || g.getName().equals("Fire")));
         while (range == null) {
-            m.sleep(Calculations.random(1000, 2000));
+            MethodProvider.sleep(Calculations.random(1000, 2000));
             range = m.getGameObjects().closest(g -> g != null && (g.getName().contains("range")  || g.getName().equals("Clay oven") || g.getName().equals("Fire")));
         }
         m.status = "Found " + range.getName();

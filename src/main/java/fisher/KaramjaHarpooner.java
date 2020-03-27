@@ -1,5 +1,7 @@
 package fisher;
 
+import org.dreambot.api.methods.MethodProvider;
+
 public class KaramjaHarpooner {
     
     BotMain m;
@@ -23,47 +25,47 @@ public class KaramjaHarpooner {
 
     public HarpooningStates getCurrentHarpoonState(){
         if(!m.traveler.hasFullInventory() && m.traveler.isInKaramjaIsland() && !m.traveler.isInsideKaramjaBoat()){
-            m.log("Trying to go fish...");
+            MethodProvider.log("Trying to go fish...");
             m.status = "Trying to go fish...";
             return HarpooningStates.FISHING;
         }
         else if (!m.traveler.hasFullInventory() && m.traveler.isInKaramjaIsland() && m.traveler.isInsideKaramjaBoat()){
-            m.log("Trying to leave boat...");
+            MethodProvider.log("Trying to leave boat...");
             m.status = "Trying to leave boat...";
             return HarpooningStates.INSIDE_BOAT_KARAMJA;
         }
         else if (m.traveler.hasFullInventory() && m.traveler.isInKaramjaIsland() && !m.traveler.isInsideKaramjaBoat()){
-            m.log("Trying to pay fare...");
+            MethodProvider.log("Trying to pay fare...");
             m.status = "Trying to pay fare...";
             return HarpooningStates.OUTSIDE_BOAT_KARAMJA;
         }
         else if (m.traveler.hasFullInventory() && m.traveler.isInPortSarim() && m.traveler.isInsidePortSarimBoat()){
-            m.log("Trying to leave boat...");
+            MethodProvider.log("Trying to leave boat...");
             m.status = "Trying to leave boat...";
             return HarpooningStates.INSIDE_BOAT_PORT_SARIM;
         }
         else if (m.traveler.hasFullInventory() && m.traveler.isInPortSarim() && !m.traveler.isInsidePortSarimBoat() && m.moneyMaker.haveCoinsForNextTravel()){
-            m.log("Trying to bank fish...");
+            MethodProvider.log("Trying to bank fish...");
             m.status = "Trying to bank fish...";
             return HarpooningStates.OUTSIDE_BOAT_PORT_SARIM_BANK;
         }
         else if (m.traveler.hasFullInventory() && m.traveler.isInPortSarim() && !m.traveler.isInsidePortSarimBoat() && !m.moneyMaker.haveCoinsForNextTravel()){
-            m.log("No Coins... Selling fish...");
+            MethodProvider.log("No Coins... Selling fish...");
             m.status = "Trying to sell fish...";
             return HarpooningStates.OUTSIDE_BOAT_PORT_SARIM_SELL;
         }
         else if (!m.traveler.hasFullInventory() && m.traveler.isInPortSarim() && !m.traveler.isInsidePortSarimBoat()){
-            m.log("Trying to travel to Karamja...");
+            MethodProvider.log("Trying to travel to Karamja...");
             m.status = "Trying to travel to Karamja...";
             return HarpooningStates.OUTSIDE_BOAT_PORT_SARIM_PAY_FARE;
         }
         else if (!m.traveler.hasFullInventory() && m.traveler.isInGeneralStore() && m.moneyMaker.haveCoinsForNextTravel() ){
-            m.log("In general store with new money... Going to Karamja.");
+            MethodProvider.log("In general store with new money... Going to Karamja.");
             m.status = "New money... Going to Karamja.";
             return HarpooningStates.IN_GENERAL_STORE_WITH_MONEY;
         }
         else if (!m.traveler.hasFullInventory() && m.traveler.isInGeneralStore() && !m.moneyMaker.haveCoinsForNextTravel() ){
-            m.log("In general store with new money... Going to Karamja.");
+            MethodProvider.log("In general store with new money... Going to Karamja.");
             m.status = "New money... Going to Karamja.";
             return HarpooningStates.IN_GENERAL_STORE_WITHOUT_MONEY;
         }
@@ -99,7 +101,7 @@ public class KaramjaHarpooner {
                 m.moneyMaker.sellFish();
                 break;
             default:
-                m.log("Program has bugged out. :(");
+                MethodProvider.log("Program has bugged out. :(");
         }
 
     }

@@ -2,6 +2,7 @@ package fisher.helpers;
 
 import fisher.BotMain;
 import org.dreambot.api.methods.Calculations;
+import org.dreambot.api.methods.MethodProvider;
 import org.dreambot.api.methods.map.Area;
 import org.dreambot.api.wrappers.interactive.GameObject;
 import org.dreambot.api.wrappers.interactive.NPC;
@@ -57,7 +58,7 @@ public class TravelHelper extends Helper {
         m.findWithCamera(boatGuy);
         boatGuy.interact("Pay-Fare");
         log("Payed fare...");
-        m.sleep(Calculations.random(7000, 9000));
+        MethodProvider.sleep(Calculations.random(7000, 9000));
     }
 
     public void payFareToKaramja() {
@@ -67,7 +68,7 @@ public class TravelHelper extends Helper {
         m.findWithCamera(boatGuy);
         boatGuy.interact("Pay-fare");
         log("Payed fare...");
-        m.sleep(Calculations.random(7000, 9000));
+        MethodProvider.sleep(Calculations.random(7000, 9000));
     }
 
     public NPC getGuyByActionName(String actionName) {
@@ -76,7 +77,7 @@ public class TravelHelper extends Helper {
                 n -> n != null && Arrays.toString(n.getActions()).contains(actionName));
         while (guy == null) {
             log("trying to get guy...");
-            m.sleep(Calculations.random(1000, 4000));
+            MethodProvider.sleep(Calculations.random(1000, 4000));
             guy = m.getNpcs().closest(
                     n -> n != null && Arrays.toString(n.getActions()).contains(actionName));
         }
@@ -117,12 +118,12 @@ public class TravelHelper extends Helper {
         m.status = "Interacting with staircase..." + " " + action;
         GameObject stairs = m.getGameObjects().closest(n -> n != null && "Staircase".equals(n.getName()));
         while (stairs == null) {
-            m.sleep(Calculations.random(1000, 2000));
+            MethodProvider.sleep(Calculations.random(1000, 2000));
             stairs = m.getGameObjects().closest(n -> n != null && "Staircase".equals(n.getName()));
         }
         m.findWithCamera(stairs);
         stairs.interact(action);
-        m.sleep(Calculations.random(1500, 3000));
+        MethodProvider.sleep(Calculations.random(1500, 3000));
 
     }
 
@@ -130,13 +131,13 @@ public class TravelHelper extends Helper {
         m.status = "Crossing Gangplank!";
         GameObject plank = m.getGameObjects().closest(n -> n != null && "Gangplank".equals(n.getName()));
         while (plank == null) {
-            m.sleep(Calculations.random(1000, 2000));
+            MethodProvider.sleep(Calculations.random(1000, 2000));
             plank = m.getGameObjects().closest(n -> n != null && "Gangplank".equals(n.getName()));
         }
         log("Found plank, crossing...");
         m.findWithCamera(plank);
         plank.interact("Cross");
-        m.sleep(Calculations.random(1500, 4000));
+        MethodProvider.sleep(Calculations.random(1500, 4000));
     }
 
     public void depositKaramjaLoot(){
@@ -146,7 +147,7 @@ public class TravelHelper extends Helper {
         while(!m.getDepositBox().open()){
             m.status = "Walking to deposit box...";
             m.randomCameraMovement();
-            m.sleep(Calculations.random(1000, 2000));
+            MethodProvider.sleep(Calculations.random(1000, 2000));
         }
         if (m.getDepositBox().isOpen()) {
             m.status = "Depositing fish...";
@@ -156,7 +157,7 @@ public class TravelHelper extends Helper {
         }
         m.getDepositBox().close();
 
-        m.sleep(Calculations.random(1000, 4000));
+        MethodProvider.sleep(Calculations.random(1000, 4000));
     }
 
     public void depositAllInventory(){
@@ -166,14 +167,14 @@ public class TravelHelper extends Helper {
         while(!m.getBank().open()){
             m.status = "Opening Bank";
             m.randomCameraMovement();
-            m.sleep(Calculations.random(1000, 2000));
+            MethodProvider.sleep(Calculations.random(1000, 2000));
         }
         if (m.getBank().isOpen()) {
             m.status = "Depositing all inventory...";
             m.getBank().depositAllItems();
         }
         if(Calculations.random(1, 10) > 4) m.getBank().close();
-        m.sleep(Calculations.random(1000, 4000));
+        MethodProvider.sleep(Calculations.random(1000, 4000));
     }
 
     public void getAllFromBank(String item){
@@ -183,14 +184,14 @@ public class TravelHelper extends Helper {
         while(!m.getBank().open()){
             m.status = "Opening Bank";
             m.randomCameraMovement();
-            m.sleep(Calculations.random(1000, 2000));
+            MethodProvider.sleep(Calculations.random(1000, 2000));
         }
         if (m.getBank().isOpen()) {
             m.status = "Withdrawing all " + item;
             m.getBank().withdrawAll(item);
         }
         if(Calculations.random(1, 10) > 4) m.getBank().close();
-        m.sleep(Calculations.random(1000, 4000));
+        MethodProvider.sleep(Calculations.random(1000, 4000));
     }
 
     public void depositAllAndWithdrawAll(String item){
@@ -200,7 +201,7 @@ public class TravelHelper extends Helper {
         while(!m.getBank().open()){
             m.status = "Opening Bank";
             m.randomCameraMovement();
-            m.sleep(Calculations.random(1000, 2000));
+            MethodProvider.sleep(Calculations.random(1000, 2000));
         }
         if (m.getBank().isOpen()) {
             m.status = "Depositing all inventory...";
@@ -209,7 +210,7 @@ public class TravelHelper extends Helper {
             sleepUntil(() -> m.getBank().withdrawAll(i -> i != null && i.getName().contains(item)), Calculations.random(1000, 3000));
         }
         if(Calculations.random(1, 10) > 4) m.getBank().close();
-        m.sleep(Calculations.random(1000, 4000));
+        MethodProvider.sleep(Calculations.random(1000, 4000));
     }
 
 
@@ -220,7 +221,7 @@ public class TravelHelper extends Helper {
         while(!m.getBank().open()){
             m.status = "Opening Bank";
             m.randomCameraMovement();
-            m.sleep(Calculations.random(1000, 2000));
+            MethodProvider.sleep(Calculations.random(1000, 2000));
         }
         if (m.getBank().isOpen()) {
             m.status = "Depositing fish...";
@@ -229,7 +230,7 @@ public class TravelHelper extends Helper {
             m.getBank().depositAll(item -> item != null && !item.getName().equals("Small fishing net"));
         }
         if(Calculations.random(1, 10) > 4) m.getBank().close();
-        m.sleep(Calculations.random(1000, 4000));
+        MethodProvider.sleep(Calculations.random(1000, 4000));
     }
 
 
