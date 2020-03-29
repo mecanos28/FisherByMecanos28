@@ -36,6 +36,17 @@ public class FishHelper extends Helper {
         }
     }
 
+    public void activateEdgevilleFlyFisher() {
+        if(inEdgevilleFishinaREA()){
+            getMeSomeTrout();
+        }else{
+            m.status = "Walking to get some fish...";
+            if(m.getWalking().walk(m.edgeVilleFisherArea.getRandomTile())){
+                MethodProvider.sleepUntil(() -> inEdgevilleFishinaREA(),Calculations.random(3000, 5500));
+            }
+        }
+    }
+
     public void activateDraynorShrimpFisher() {
         if(inRimmingtonShrimpingArea()){
             getMeSomeShrimp();
@@ -57,6 +68,10 @@ public class FishHelper extends Helper {
 
     private boolean inKaramjaFishingArea() {
         return m.fishingPierArea.contains(m.getLocalPlayer()) || m.getLocalPlayer().distance(m.fishingPierArea.getCenter()) < 4;
+    }
+
+    private boolean inEdgevilleFishinaREA() {
+        return m.edgeVilleFisherArea.contains(m.getLocalPlayer()) || m.getLocalPlayer().distance(m.edgeVilleFisherArea.getCenter()) < 14;
     }
 
     public void dropTunas() {
@@ -99,6 +114,27 @@ public class FishHelper extends Helper {
             MethodProvider.sleep(1000);
             m.moveCursor();
             if (m.getLocalPlayer().getAnimation() == 621) {
+                MethodProvider.sleepUntil(() -> m.getLocalPlayer().getAnimation() == -1, 60000);
+                MethodProvider.sleep(Calculations.random(1300,4900));
+            }
+        }
+    }
+
+    public void getMeSomeTrout(){
+        m.randomCameraMovement();
+        MethodProvider.log("Trying to get some trout.");
+        m.status = "Searching for trout spot...";
+        NPC fishingSpot = m.getNpcs().closest(
+                n -> n != null && Arrays.toString(n.getActions()).contains("Lure") || Arrays.toString(n.getActions()).contains("Bait"));
+
+        m.findWithCamera(fishingSpot);
+
+        if(fishingSpot != null && fishingSpot.interact(("Lure"))){
+            MethodProvider.log("Found fishing spot: " + fishingSpot.getName() + " Coordinates: "+ fishingSpot.getGridX() + " - " + fishingSpot.getGridY());
+            m.status = "Fishing! :)";
+            MethodProvider.sleep(1000);
+            m.moveCursor();
+            if (m.getLocalPlayer().getAnimation() == 622) {
                 MethodProvider.sleepUntil(() -> m.getLocalPlayer().getAnimation() == -1, 60000);
                 MethodProvider.sleep(Calculations.random(1300,4900));
             }

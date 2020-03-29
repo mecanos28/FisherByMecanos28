@@ -4,7 +4,6 @@ import fisher.helpers.*;
 import org.dreambot.api.methods.Calculations;
 import org.dreambot.api.methods.map.Area;
 import org.dreambot.api.methods.skills.Skill;
-import org.dreambot.api.methods.skills.Skills;
 import org.dreambot.api.methods.tabs.Tab;
 import org.dreambot.api.script.AbstractScript;
 import org.dreambot.api.script.Category;
@@ -18,7 +17,6 @@ import org.dreambot.api.wrappers.items.GroundItem;
 import org.dreambot.api.wrappers.widgets.message.Message;
 
 import java.awt.*;
-import java.util.Optional;
 
 
 /*
@@ -37,12 +35,21 @@ public class BotMain extends AbstractScript implements MessageListener {
 
     public final Area lumbridgeShrimpArea =  new Area(3243, 3154, 3240, 3150, 0);
     public final Area lumbridgeFirstFloorStairsArea =  new Area(3206, 3208, 3206, 3209, 0);
-    public final Area lumbridgeThirdFloorStairsArea =  new Area(3205, 3209, 3206, 3209, 2);
+    public final Area lumbridgeThirdFloorStairsArea =  new Area(3205, 3209, 3205, 3210, 2);
 
     public final Area rimmingtonShrimpArea =  new Area(3087, 3227, 3087, 3230, 0);
 
     public final Area lumbridgeCookingArea =  new Area(3207, 3212, 3211, 3216, 0);
 
+    public final Area lumbridgeMineArea =  new Area(3223, 3149, 3231, 3145, 0);
+
+    public final Area faladorFurnaceArea =  new Area(2973, 3368, 2974, 3374, 0);
+
+    public final Area edgeVilleFisherArea =  new Area(3108, 3435, 3109, 3432, 0);
+    public final Area edgeVilleFireArea =  new Area(3103, 3433, 3106, 3432, 0);
+    // copper ore, tin ore
+
+    public final Area lumbridgeCowArea =  new Area(3196, 3288, 3208, 3299, 0);
 
 
     private Timer t = new Timer();
@@ -52,12 +59,18 @@ public class BotMain extends AbstractScript implements MessageListener {
     public CoinsHelper moneyMaker;
     public CookHelper cookHelper;
     public FighterHelper fighterHelper;
+    public MineHelper mineHelper;
+    public SmeltingHelper smeltingHelper;
 
     private KaramjaHarpooner karamjaHarpooner;
     private LumbridgeShrimper lumbridgeShrimper;
     private DraynorShrimper draynorShrimper;
     private LumbridgeCooker lumbridgeCooker;
+    private LumbridgeCowKiller lumbridgeCowKiller;
     private LumbridgeChickenKiller lumbridgeChickenKiller;
+    private LumbridgeMiner lumbridgeMiner;
+    private FaladorSmelter faladorSmelter;
+    private EdgevilleFisher edgevilleFisher;
 
 
     public int fishCatched;
@@ -113,6 +126,26 @@ public class BotMain extends AbstractScript implements MessageListener {
                 LumbridgeChickenKiller.ChickenKillerStates chickenKillerState = lumbridgeChickenKiller.getCurrentFighterState();
                 lumbridgeChickenKiller.processFighterState(chickenKillerState);
                 break;
+            case ("Lumbridge Miner"):
+                if(currentSkill == null) {currentSkill = Skill.MINING;}
+                LumbridgeMiner.MinerStates miningState = lumbridgeMiner.getCurrentMiningState();
+                lumbridgeMiner.processMineState(miningState);
+                break;
+            case ("Falador Smelter"):
+                if(currentSkill == null) {currentSkill = Skill.SMITHING;}
+                FaladorSmelter.SmelterStates smelterState = faladorSmelter.getCurrentFaladorSmelterState();
+                faladorSmelter.processSmelterState(smelterState);
+                break;
+            case ("Edgeville Fly Fisher"):
+                if(currentSkill == null) {currentSkill = Skill.FISHING;}
+                EdgevilleFisher.FisherStates state = edgevilleFisher.getCurrentFisherState();
+                edgevilleFisher.processState(state);
+                break;
+            case ("Lumbridge Cow Fighter"):
+                if(currentSkill == null) {currentSkill = Skill.RANGED;}
+                LumbridgeCowKiller.CowKillerStates cowKillerState = lumbridgeCowKiller.getCurrentFighterState();
+                lumbridgeCowKiller.processFighterState(cowKillerState);
+                break;
 
             default:
         }
@@ -135,12 +168,19 @@ public class BotMain extends AbstractScript implements MessageListener {
         moneyMaker = new CoinsHelper(this);
         cookHelper =  new CookHelper(this, "Raw anchovies");
         fighterHelper =  new FighterHelper(this);
+        mineHelper = new MineHelper(this);
+        smeltingHelper =  new SmeltingHelper(this, "Tin ore");
 
         karamjaHarpooner = new KaramjaHarpooner(this);
         lumbridgeShrimper = new LumbridgeShrimper(this);
         draynorShrimper = new DraynorShrimper(this);
         lumbridgeCooker = new LumbridgeCooker(this);
         lumbridgeChickenKiller = new LumbridgeChickenKiller(this);
+        lumbridgeMiner = new LumbridgeMiner(this);
+        faladorSmelter = new FaladorSmelter(this);
+        edgevilleFisher =  new EdgevilleFisher(this);
+        lumbridgeCowKiller =  new LumbridgeCowKiller(this);
+
 
     }
 
@@ -272,13 +312,14 @@ public class BotMain extends AbstractScript implements MessageListener {
             case 25:
                 moveCursorOutside();
                 status = "sleeping...";
-                sleep(Calculations.random(60000, 180000));
+                sleep(Calculations.random(30000, 75000));
                 break;
             case 23:
                 getTabs().open(Tab.SKILLS);
                 getSkills().hoverSkill(currentSkill);
                 sleep(Calculations.random(5000,14000));
                 getTabs().open(Tab.INVENTORY);
+                break;
             case 22:
                 getTabs().open(Tab.EQUIPMENT);
                 sleep(Calculations.random(5000, 14000));

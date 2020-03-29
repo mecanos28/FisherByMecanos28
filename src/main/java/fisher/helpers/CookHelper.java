@@ -5,6 +5,7 @@ import org.dreambot.api.methods.Calculations;
 import org.dreambot.api.methods.MethodProvider;
 import org.dreambot.api.methods.tabs.Tab;
 import org.dreambot.api.wrappers.interactive.Entity;
+import org.dreambot.api.wrappers.items.Item;
 import org.dreambot.api.wrappers.widgets.WidgetChild;
 
 import java.util.List;
@@ -57,14 +58,45 @@ public class CookHelper extends Helper {
         }
     }
 
+    public void cookAllRaw() {
+        m.status = "Trying to click cooking spot";
+        if(!m.getTabs().isOpen(Tab.INVENTORY)){
+            m.getTabs().open(Tab.INVENTORY);
+        }
+        Entity range = getCloseByCookingSpot();
+        makeInteractiveWidgetShow(range);
+        m.status = "Trying to click cooking action";
+        WidgetChild cook = m.getWidgets().getWidgetChild(270, 14);
+        if(cook != null && cook.interact()) {
+            m.status = "Cooking!";
+            if (m.getLocalPlayer().isAnimating() || !m.getLocalPlayer().isStandingStill()) {
+                MethodProvider.sleep(Calculations.random(1000, 3000));
+                MethodProvider.sleepWhile(() -> m.getLocalPlayer().isAnimating() || m.getInventory().contains(item -> item != null && item.getName().toLowerCase().contains("raw")), Calculations.random(60000));
+            }
+        }
+        if(m.getInventory().contains(item -> item != null && item.getName().toLowerCase().contains("raw"))){
+            MethodProvider.sleep(Calculations.random(1500, 10000));
+        }
+    }
+
     private void makeInteractiveWidgetShow(Entity range) {
         m.findWithCamera(range);
-        clickEntity(range);
+        interactWithEntity(range);
+        MethodProvider.sleep(Calculations.random(2300, 3000));
         List<WidgetChild> children = getFoodChildren();
         while (children.isEmpty()){
-            clickEntity(range);
-            MethodProvider.sleep(Calculations.random(1000, 2400));
+            interactWithEntity(range);
+            MethodProvider.sleep(Calculations.random(2300, 3000));
             children = getFoodChildren();
+        }
+    }
+
+    private void interactWithEntity(Entity range) {
+        if(!range.getName().toLowerCase().contains("fire")){
+            clickEntity(range);
+        } else {
+            Item item = m.getInventory().get(it -> it.getName().toLowerCase().contains("raw"));
+            item.useOn(range);
         }
     }
 

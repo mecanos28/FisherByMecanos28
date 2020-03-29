@@ -122,6 +122,7 @@ public class TravelHelper extends Helper {
             stairs = m.getGameObjects().closest(n -> n != null && "Staircase".equals(n.getName()));
         }
         m.findWithCamera(stairs);
+        m.randomCameraMovement();
         stairs.interact(action);
         MethodProvider.sleep(Calculations.random(1500, 3000));
 
@@ -213,6 +214,26 @@ public class TravelHelper extends Helper {
         MethodProvider.sleep(Calculations.random(1000, 4000));
     }
 
+    public void depositAllAndWithdrawForBronze(){
+        log("Banking.");
+        m.randomCameraMovement();
+
+        while(!m.getBank().open()){
+            m.status = "Opening Bank";
+            m.randomCameraMovement();
+            MethodProvider.sleep(Calculations.random(1000, 2000));
+        }
+        if (m.getBank().isOpen()) {
+            m.status = "Depositing all inventory...";
+            if(!m.getInventory().isEmpty()) sleepUntil(() -> m.getBank().depositAllItems(), Calculations.random(1000, 3000));
+            log("Withdrawing all ores");
+            sleepUntil(() -> m.getBank().withdraw("Copper ore", 14), 14);
+            sleepUntil(() -> m.getBank().withdraw("Tin ore", 14), 14);
+        }
+        if(Calculations.random(1, 10) > 4) m.getBank().close();
+        MethodProvider.sleep(Calculations.random(1000, 4000));
+    }
+
 
     public void bankShrimp(){
         log("Banking.");
@@ -231,6 +252,30 @@ public class TravelHelper extends Helper {
         }
         if(Calculations.random(1, 10) > 4) m.getBank().close();
         MethodProvider.sleep(Calculations.random(1000, 4000));
+    }
+
+    public void bankFlyFishing(){
+        log("Banking.");
+        m.randomCameraMovement();
+
+        while(!m.getBank().open()){
+            m.status = "Opening Bank";
+            m.randomCameraMovement();
+            MethodProvider.sleep(Calculations.random(1000, 2000));
+        }
+        if (m.getBank().isOpen()) {
+            m.status = "Depositing fish...";
+            m.getBank().depositAll(item -> item != null && item.getName().toLowerCase().contains("raw"));
+            while (!onlyHasFlyFishingSupplies()){
+                m.getBank().depositAll(item -> item != null && !item.getName().equals("Feather") && !item.getName().equals("Fly fishing rod"));
+            }
+        }
+        if(Calculations.random(1, 10) > 4) m.getBank().close();
+        MethodProvider.sleep(Calculations.random(1000, 4000));
+    }
+
+    public boolean onlyHasFlyFishingSupplies() {
+        return m.getInventory().onlyContains(item -> item != null && item.getName().equals("Feather") || item.getName().equals("Fly fishing rod"));
     }
 
 
