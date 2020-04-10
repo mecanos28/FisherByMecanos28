@@ -71,7 +71,8 @@ public class LumbridgeCowKiller {
     public boolean shouldLootCow() {
         return (m.getCloseByGroundItem("arrow") != null
                 || m.getCloseByGroundItem("bones") != null
-                || m.getCloseByGroundItem("cowhide") != null)
+//                || m.getCloseByGroundItem("cowhide") != null
+        )
                 && !m.traveler.hasFullInventory();
     }
 

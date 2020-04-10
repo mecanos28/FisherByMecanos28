@@ -79,6 +79,19 @@ public class FighterHelper extends Helper {
 
     }
 
+
+    public void activateKillAndLootGiants(){
+        if(inHillGiantArea()){
+            killGiantsAndLoot();
+        }else{
+            m.status = "Walking to get some giants...";
+            if(m.getWalking().walk(m.dungeonHillGiantArea.getRandomTile())){
+                sleepUntil(() -> inHillGiantArea(),Calculations.random(3000, 5500));
+            }
+        }
+
+    }
+
     public void killCowsAndLoot() {
         NPC cow = m.getCloseByNPC("cow");
         if(cow != null && !cow.isInCombat() && cow.canAttack()) {
@@ -91,15 +104,21 @@ public class FighterHelper extends Helper {
         lootCowItems();
     }
 
-    public void lootCowItems() {
-        GroundItem cowhide = m.getCloseByGroundItem("cowhide"); //Getting Feather
-        if(cowhide != null && !m.traveler.hasFullInventory() && !m.getLocalPlayer().isInCombat()) {
-            MethodProvider.sleep(Calculations.random(300, 500));
-            m.lootNearbyItem(cowhide);
-            MethodProvider.sleep(Calculations.random(800, 900));
-            cowhide = m.getCloseByGroundItem("feather");
+    public void killGiantsAndLoot() {
+        NPC giant = m.getCloseByNPC("giant");
+        if(giant != null && !giant.isInCombat() && giant.canAttack()) {
+            m.status = "trying to attack giant...";
+            giant.interact("Attack");
+            m.getCamera().rotateToEntity(giant);
+            MethodProvider.sleep(Calculations.random(1000, 3000));
+            MethodProvider.sleepWhile(() -> m.getLocalPlayer().isInCombat(),Calculations.random(60000));
+            MethodProvider.sleep(Calculations.random(2000, 3000));
         }
 
+        lootGiantItems();
+    }
+
+    public void lootCowItems() {
         GroundItem arrows = m.getCloseByGroundItem("arrow"); //Getting Arrows
         if(arrows != null && !m.traveler.hasFullInventory()){
             MethodProvider.sleep(Calculations.random(300, 500));
@@ -108,12 +127,66 @@ public class FighterHelper extends Helper {
             arrows = m.getCloseByGroundItem("arrow");
         }
 
+//        GroundItem cowhide = m.getCloseByGroundItem("cowhide"); //Getting Feather
+//        if(cowhide != null && !m.traveler.hasFullInventory() && !m.getLocalPlayer().isInCombat()) {
+//            MethodProvider.sleep(Calculations.random(300, 500));
+//            m.lootNearbyItem(cowhide);
+//            MethodProvider.sleep(Calculations.random(800, 900));
+//            cowhide = m.getCloseByGroundItem("feather");
+//        }
+
         GroundItem bones = m.getCloseByGroundItem("bones"); //Getting Arrows
         if(bones != null  && !m.traveler.hasFullInventory()){
             MethodProvider.sleep(Calculations.random(300, 500));
             m.lootNearbyItem(bones);
             MethodProvider.sleep(Calculations.random(800, 900));
             bones = m.getCloseByGroundItem("bones");
+        }
+    }
+
+    public void lootGiantItems() {
+        m.status = "looting giant...";
+
+        GroundItem arrows = m.getCloseByGroundItem("bronze arrow"); //Getting Arrows
+        if(arrows != null && !m.getLocalPlayer().isInCombat()){
+            MethodProvider.sleep(Calculations.random(300, 500));
+            m.lootNearbyItem(arrows);
+            MethodProvider.sleep(Calculations.random(800, 900));
+        }
+
+        GroundItem root = m.getCloseByGroundItem("root"); //Getting Feather
+        if(root != null && !m.traveler.hasFullInventory() && !m.getLocalPlayer().isInCombat()) {
+            MethodProvider.sleep(Calculations.random(300, 500));
+            m.lootNearbyItem(root);
+            MethodProvider.sleep(Calculations.random(800, 900));
+        }
+
+        GroundItem bones = m.getCloseByGroundItem("bones"); //Getting Arrows
+        if(bones != null  && !m.traveler.hasFullInventory()){
+            MethodProvider.sleep(Calculations.random(300, 500));
+            m.lootNearbyItem(bones);
+            MethodProvider.sleep(Calculations.random(800, 900));
+        }
+
+        GroundItem runes = m.getCloseByGroundItem("rune"); //Getting Arrows
+        if(runes != null  && !m.traveler.hasFullInventory()){
+            MethodProvider.sleep(Calculations.random(300, 500));
+            m.lootNearbyItem(runes);
+            MethodProvider.sleep(Calculations.random(800, 900));
+        }
+
+        GroundItem coins = m.getCloseByGroundItem("coins"); //Getting Arrows
+        if(coins != null  && !m.traveler.hasFullInventory()){
+            MethodProvider.sleep(Calculations.random(300, 500));
+            m.lootNearbyItem(coins);
+            MethodProvider.sleep(Calculations.random(800, 900));
+        }
+
+        GroundItem uncut = m.getCloseByGroundItem("uncut"); //Getting Arrows
+        if(uncut != null  && !m.traveler.hasFullInventory()){
+            MethodProvider.sleep(Calculations.random(300, 500));
+            m.lootNearbyItem(uncut);
+            MethodProvider.sleep(Calculations.random(800, 900));
         }
     }
 
@@ -129,5 +202,13 @@ public class FighterHelper extends Helper {
 
     public boolean inLumbrdigeCowArea() {
         return m.lumbridgeCowArea.contains(m.getLocalPlayer()) || m.getLocalPlayer().distance(m.lumbridgeCowArea.getCenter()) < 3;
+    }
+
+    public boolean inHillGiantArea() {
+        return m.dungeonHillGiantArea.contains(m.getLocalPlayer()) || m.getLocalPlayer().distance(m.dungeonHillGiantArea.getCenter()) < 50;
+    }
+
+    public boolean inDungeonRoomHillGiantArea() {
+        return m.hillGiantRoomArea.contains(m.getLocalPlayer()) || m.getLocalPlayer().distance(m.hillGiantRoomArea.getCenter()) < 2;
     }
 }

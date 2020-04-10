@@ -3,6 +3,7 @@ package fisher;
 import fisher.helpers.*;
 import org.dreambot.api.methods.Calculations;
 import org.dreambot.api.methods.map.Area;
+import org.dreambot.api.methods.map.Tile;
 import org.dreambot.api.methods.skills.Skill;
 import org.dreambot.api.methods.tabs.Tab;
 import org.dreambot.api.script.AbstractScript;
@@ -52,6 +53,16 @@ public class BotMain extends AbstractScript implements MessageListener {
     public final Area lumbridgeCowArea =  new Area(3196, 3288, 3208, 3299, 0);
 
 
+    public final Area hillGiantRoomArea = new Area(3115, 3451, 3115, 3452, 0);
+
+
+    public final Area dungeonHillGiantArea =  new Area(3100, 9855, 3130, 9831, 0);
+
+    public final Area dungeonHillGiantLadderArea =  new Area(3117, 9853, 3117, 9851, 0);
+
+    // 3117 9853 3117 9851
+
+
     private Timer t = new Timer();
 
     public TravelHelper traveler;
@@ -71,6 +82,7 @@ public class BotMain extends AbstractScript implements MessageListener {
     private LumbridgeMiner lumbridgeMiner;
     private FaladorSmelter faladorSmelter;
     private EdgevilleFisher edgevilleFisher;
+    private VarrockHillGiantKiller varrockHillGiantKiller;
 
 
     public int fishCatched;
@@ -146,6 +158,11 @@ public class BotMain extends AbstractScript implements MessageListener {
                 LumbridgeCowKiller.CowKillerStates cowKillerState = lumbridgeCowKiller.getCurrentFighterState();
                 lumbridgeCowKiller.processFighterState(cowKillerState);
                 break;
+            case ("Varrock Hill Giants"):
+                if(currentSkill == null) {currentSkill = Skill.RANGED;}
+                VarrockHillGiantKiller.HillGiantKillerStates stateHillGiants = varrockHillGiantKiller.getCurrentFighterState();
+                varrockHillGiantKiller.processFighterState(stateHillGiants);
+                break;
 
             default:
         }
@@ -180,6 +197,7 @@ public class BotMain extends AbstractScript implements MessageListener {
         faladorSmelter = new FaladorSmelter(this);
         edgevilleFisher =  new EdgevilleFisher(this);
         lumbridgeCowKiller =  new LumbridgeCowKiller(this);
+        varrockHillGiantKiller =  new VarrockHillGiantKiller(this);
 
 
     }
@@ -224,7 +242,7 @@ public class BotMain extends AbstractScript implements MessageListener {
             g.drawString("Fish catched:" + fishCatched, 29, 65);
         }
         g.drawString("Levels gained: " + levelsGained + " | Current level: " + getSkills().getRealLevel(currentSkill), 29, 80);
-        g.drawString("Fishing XP/H: " + getSkillTracker().getGainedExperiencePerHour(currentSkill), 29, 95);
+        g.drawString(currentSkill.getName() + " XP/H: " + getSkillTracker().getGainedExperiencePerHour(currentSkill), 29, 95);
         g.drawString("Status: " + status, 29, 110);
 
     }
@@ -312,7 +330,7 @@ public class BotMain extends AbstractScript implements MessageListener {
             case 25:
                 moveCursorOutside();
                 status = "sleeping...";
-                sleep(Calculations.random(30000, 75000));
+                sleep(Calculations.random(20000, 50000));
                 break;
             case 23:
                 getTabs().open(Tab.SKILLS);
@@ -361,19 +379,20 @@ public class BotMain extends AbstractScript implements MessageListener {
 
     public NPC getCloseByNPC(String name) {
         NPC npc;
-        sleep(Calculations.random(1000, 2000));
+        sleep(Calculations.random(300, 800));
         npc = getNpcs().closest(g -> g != null && (g.getName().toLowerCase().contains(name)));
         status = "Found " + npc.getName();
         return npc;
     }
 
     public GroundItem getCloseByGroundItem(String name) {
-        GroundItem groundItem;
+        GroundItem groundItem = null;
         groundItem = getGroundItems().closest(g -> (canPickup(g) && g.getName().toLowerCase().contains(name)));
         if (groundItem != null){
             status = "Found " + groundItem.getName();
         }else{
             status = " COULD NOT FIND " + name;
+            return null;
         }
         return groundItem;
     }
@@ -393,7 +412,7 @@ public class BotMain extends AbstractScript implements MessageListener {
     }
 
     private boolean canPickup(GroundItem g) {
-        return getMap().canReach(g) && g.distance(getLocalPlayer()) < 4;
+        return getMap().canReach(g) && g.distance(getLocalPlayer()) < 3;
     }
 
 

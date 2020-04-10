@@ -44,7 +44,8 @@ public class FisherGUI extends JFrame {
                 "Lumbridge Cow Fighter",
                 "Lumbridge Miner",
                 "Falador Smelter",
-                "Edgeville Fly Fisher"
+                "Edgeville Fly Fisher",
+                "Varrock Hill Giants"
         }));
         contentPane.add(modeComboBox);
         modeComboBox.setBounds(15, 10, 185, 35);

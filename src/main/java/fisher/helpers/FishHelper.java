@@ -25,6 +25,17 @@ public class FishHelper extends Helper {
         }
     }
 
+    public void activateLobsterFisher() {
+        if(inKaramjaFishingArea()){
+            getMeSomeLobsters();
+        }else{
+            m.status = "Walking to get some fish...";
+            if(m.getWalking().walk(m.fishingPierArea.getRandomTile())){
+                MethodProvider.sleepUntil(() -> inKaramjaFishingArea(),Calculations.random(3000, 5500));
+            }
+        }
+    }
+
     public void activateLumbridgeShrimpFisher() {
         if(inLumbridgeShrimpingArea()){
             getMeSomeShrimp();
@@ -93,6 +104,22 @@ public class FishHelper extends Helper {
         m.findWithCamera(fishingSpot);
 
         if(fishingSpot != null && fishingSpot.interact("Harpoon")){
+            MethodProvider.log("Found fishing spot: " + fishingSpot.getName() + " Coordinates: "+ fishingSpot.getGridX() + " - " + fishingSpot.getGridY());
+            m.status = "Fishing! :)";
+            MethodProvider.sleepUntil(() -> m.getLocalPlayer().getAnimation() == -1, Calculations.random(20000, 25000));
+        }
+    }
+
+    public void getMeSomeLobsters(){
+        m.randomCameraMovement();
+        MethodProvider.log("Trying to get some fish.");
+        m.status = "Searching for harpooning spot...";
+        NPC fishingSpot = m.getNpcs().closest(
+                n -> n != null && Arrays.toString(n.getActions()).contains("Harpoon") && Arrays.toString(n.getActions()).contains("Cage"));
+
+        m.findWithCamera(fishingSpot);
+
+        if(fishingSpot != null && fishingSpot.interact("Cage")){
             MethodProvider.log("Found fishing spot: " + fishingSpot.getName() + " Coordinates: "+ fishingSpot.getGridX() + " - " + fishingSpot.getGridY());
             m.status = "Fishing! :)";
             MethodProvider.sleepUntil(() -> m.getLocalPlayer().getAnimation() == -1, Calculations.random(20000, 25000));

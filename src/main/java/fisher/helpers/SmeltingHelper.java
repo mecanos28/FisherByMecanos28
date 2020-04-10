@@ -83,7 +83,7 @@ public class SmeltingHelper extends Helper {
     }
 
     private boolean inFaladorSmeltingArea() {
-        return m.faladorFurnaceArea.contains(m.getLocalPlayer()) || m.getLocalPlayer().distance(m.lumbridgeCookingArea.getCenter()) < 3;
+        return m.faladorFurnaceArea.contains(m.getLocalPlayer()) || m.getLocalPlayer().distance(m.lumbridgeCookingArea.getCenter()) < 6;
     }
 
 

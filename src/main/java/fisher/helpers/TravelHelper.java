@@ -3,6 +3,7 @@ package fisher.helpers;
 import fisher.BotMain;
 import org.dreambot.api.methods.Calculations;
 import org.dreambot.api.methods.MethodProvider;
+import org.dreambot.api.methods.container.impl.bank.BankLocation;
 import org.dreambot.api.methods.map.Area;
 import org.dreambot.api.wrappers.interactive.GameObject;
 import org.dreambot.api.wrappers.interactive.NPC;
@@ -20,7 +21,7 @@ public class TravelHelper extends Helper {
 
 
     public void walkToKaramjaPier() {
-        while (!m.karamjaPierArea.contains(m.getLocalPlayer())) {
+        while (!m.karamjaPierArea.contains(m.getLocalPlayer()) || !(m.getLocalPlayer().distance(m.karamjaPierArea.getCenter()) < 5)) {
             m.status = "Walking to Karamja Pier...";
             m.getWalking().walk(m.karamjaPierArea.getRandomTile());
             sleepUntil(() -> !m.getLocalPlayer().isMoving(), 5200);
@@ -28,7 +29,7 @@ public class TravelHelper extends Helper {
     }
 
     public void walkToPortSarimPier() {
-        while (!m.sarimPierArea.contains(m.getLocalPlayer())) {
+        while (!m.sarimPierArea.contains(m.getLocalPlayer()) || !(m.getLocalPlayer().distance(m.sarimPierArea.getCenter()) < 5)) {
             m.status = "Walking to Port Sarim Pier...";
             m.getWalking().walk(m.sarimPierArea.getRandomTile());
             sleepUntil(() -> !m.getLocalPlayer().isMoving(), 5200);
@@ -47,6 +48,14 @@ public class TravelHelper extends Helper {
         while (!area.contains(m.getLocalPlayer()) || !(m.getLocalPlayer().distance(area.getCenter()) < 5)) {
             m.status = "Walking...";
             m.getWalking().walk(area.getRandomTile());
+            sleepUntil(() -> !m.getLocalPlayer().isMoving(), 5200);
+        }
+    }
+
+    public void walkToAreaClose(Area area) {
+        while (!area.contains(m.getLocalPlayer()) || !(m.getLocalPlayer().distance(area.getCenter()) < 1)) {
+            m.status = "Walking...";
+            m.getWalking().walk(area.getCenter());
             sleepUntil(() -> !m.getLocalPlayer().isMoving(), 5200);
         }
     }
@@ -92,8 +101,14 @@ public class TravelHelper extends Helper {
 
     public boolean isInPortSarim() { return m.getLocalPlayer().distance(m.sarimPierArea.getCenter()) < 60; }
 
+    public boolean isInVarrock() { return m.getLocalPlayer().distance(BankLocation.VARROCK_WEST.getCenter()) < 60; }
+
     public boolean hasFullInventory() {
         return m.getInventory().isFull();
+    }
+
+    public boolean hasFood(String food) {
+        return m.getInventory().contains(item -> item != null && item.getName().toLowerCase().contains(food));
     }
 
     public boolean hasItemInInventory(String item) {
@@ -116,10 +131,10 @@ public class TravelHelper extends Helper {
 
     public void interactWithStaircase(String action){
         m.status = "Interacting with staircase..." + " " + action;
-        GameObject stairs = m.getGameObjects().closest(n -> n != null && "Staircase".equals(n.getName()));
+        GameObject stairs = m.getGameObjects().closest(n -> n != null && ("Staircase".equals(n.getName())) || "Ladder".equals(n.getName()));
         while (stairs == null) {
             MethodProvider.sleep(Calculations.random(1000, 2000));
-            stairs = m.getGameObjects().closest(n -> n != null && "Staircase".equals(n.getName()));
+            stairs = m.getGameObjects().closest(n -> n != null && ("Staircase".equals(n.getName())) || "Ladder".equals(n.getName()));
         }
         m.findWithCamera(stairs);
         m.randomCameraMovement();
@@ -154,7 +169,8 @@ public class TravelHelper extends Helper {
             m.status = "Depositing fish...";
             m.getDepositBox().depositAll("Raw tuna");
             m.getDepositBox().depositAll("Raw swordfish");
-            m.getDepositBox().depositAll(item -> item != null && !item.getName().equals("Coins") && !item.getName().equals("Harpoon"));
+            m.getDepositBox().depositAll("Raw lobster");
+            m.getDepositBox().depositAll(item -> item != null && !item.getName().equals("Coins") && !item.getName().equals("Harpoon") && !item.getName().equals("Lobster pot"));
         }
         m.getDepositBox().close();
 
@@ -174,7 +190,7 @@ public class TravelHelper extends Helper {
             m.status = "Depositing all inventory...";
             m.getBank().depositAllItems();
         }
-        if(Calculations.random(1, 10) > 4) m.getBank().close();
+        m.getBank().close();
         MethodProvider.sleep(Calculations.random(1000, 4000));
     }
 
@@ -235,6 +251,7 @@ public class TravelHelper extends Helper {
     }
 
 
+
     public void bankShrimp(){
         log("Banking.");
         m.randomCameraMovement();
@@ -274,8 +291,33 @@ public class TravelHelper extends Helper {
         MethodProvider.sleep(Calculations.random(1000, 4000));
     }
 
+    public void bankHillGiants(){
+        log("Banking.");
+        m.randomCameraMovement();
+
+        while(!m.getBank().open()){
+            m.status = "Opening Bank";
+            m.randomCameraMovement();
+            MethodProvider.sleep(Calculations.random(1000, 2000));
+        }
+        if (m.getBank().isOpen()) {
+            m.status = "Depositing loot...";
+            while (!m.getInventory().onlyContains(item -> item != null && item.getName().toLowerCase().contains("key"))){
+                m.getBank().depositAll(item -> item != null && !item.getName().toLowerCase().contains("key"));
+                m.sleep(500);
+            }
+            sleepUntil(() -> m.getBank().withdraw("Trout", 27), 6000);
+        }
+        m.getBank().close();
+        MethodProvider.sleep(Calculations.random(1000, 4000));
+    }
+
     public boolean onlyHasFlyFishingSupplies() {
         return m.getInventory().onlyContains(item -> item != null && item.getName().equals("Feather") || item.getName().equals("Fly fishing rod"));
+    }
+
+    public boolean onlyHasKey() {
+        return m.getInventory().onlyContains(item -> item != null && item.getName().equals("Brass key"));
     }
 
 

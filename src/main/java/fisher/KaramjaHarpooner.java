@@ -76,7 +76,7 @@ public class KaramjaHarpooner {
         m.randomCameraMovement();
         switch(curentState) {
             case FISHING:
-                m.fisher.activateHarpoonFisher();
+                m.fisher.activateLobsterFisher();
                 break;
             case INSIDE_BOAT_KARAMJA:
             case INSIDE_BOAT_PORT_SARIM:
